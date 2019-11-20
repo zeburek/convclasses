@@ -1,0 +1,25 @@
+name: Deploy package
+
+on: [create]
+
+jobs:
+
+  build-n-publish:
+    name: Publish binary by tag
+    if: startsWith(github.event.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Build a binary wheel and a source tarball
+        run: |
+          pip install wheel
+          python setup.py sdist bdist_wheel
+      - name: Publish distribution 📦to PyPI
+        if: startsWith(github.event.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@v1.0.0a0
+        with:
+          password: ${{ secrets.PYPI_PASSWORD }}
