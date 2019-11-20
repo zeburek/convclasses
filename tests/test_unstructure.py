@@ -1,8 +1,8 @@
 """Tests for dumping."""
 from typing import Any, Type
 
-from attr import asdict, astuple
-from cattr.converters import Converter, UnstructureStrategy
+from dataclasses import asdict, astuple
+from convclasses.converters import Converter, UnstructureStrategy
 
 from hypothesis import given
 from hypothesis.strategies import sampled_from, data

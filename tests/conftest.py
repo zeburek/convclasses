@@ -1,8 +1,8 @@
 import pytest
 
-from hypothesis import HealthCheck, settings
+from hypothesis import HealthCheck, settings, Verbosity
 
-from cattr import Converter
+from convclasses import Converter
 
 
 @pytest.fixture()
@@ -11,7 +11,10 @@ def converter():
 
 
 settings.register_profile(
-    "tests", suppress_health_check=(HealthCheck.too_slow,), deadline=None
+    "tests",
+    suppress_health_check=(HealthCheck.too_slow,),
+    deadline=None,
+    verbosity=Verbosity.verbose,
 )
 
 settings.load_profile("tests")

@@ -1,10 +1,10 @@
 """Tests for auto-disambiguators."""
-import attr
 import pytest
+from dataclasses import dataclass, fields, asdict
 
 from hypothesis import assume, given
 
-from cattr.disambiguators import create_uniq_field_dis_func
+from convclasses.disambiguators import create_uniq_field_dis_func
 
 from . import simple_classes
 
@@ -12,7 +12,7 @@ from . import simple_classes
 def test_edge_errors():
     """Edge input cases cause errors."""
 
-    @attr.s
+    @dataclass
     class A(object):
         pass
 
@@ -20,7 +20,7 @@ def test_edge_errors():
         # Can't generate for only one class.
         create_uniq_field_dis_func(A)
 
-    @attr.s
+    @dataclass
     class B(object):
         pass
 
@@ -28,13 +28,13 @@ def test_edge_errors():
         # No fields on either class.
         create_uniq_field_dis_func(A, B)
 
-    @attr.s
+    @dataclass
     class C(object):
-        a = attr.ib()
+        a: str
 
-    @attr.s
+    @dataclass
     class D(object):
-        a = attr.ib()
+        a: str
 
     with pytest.raises(ValueError):
         # No unique fields on either class.
@@ -46,18 +46,18 @@ def test_fallback(cl_and_vals):
     """The fallback case works."""
     cl, vals = cl_and_vals
 
-    assume(attr.fields(cl))  # At least one field.
+    assume(fields(cl))  # At least one field.
 
-    @attr.s
+    @dataclass
     class A(object):
         pass
 
     fn = create_uniq_field_dis_func(A, cl)
 
     assert fn({}) is A
-    assert fn(attr.asdict(cl(*vals))) is cl
+    assert fn(asdict(cl(*vals))) is cl
 
-    attr_names = {a.name for a in attr.fields(cl)}
+    attr_names = {a.name for a in fields(cl)}
 
     if "xyz" not in attr_names:
         fn({"xyz": 1}) is A  # Uses the fallback.
@@ -69,8 +69,8 @@ def test_disambiguation(cl_and_vals_a, cl_and_vals_b):
     cl_a, vals_a = cl_and_vals_a
     cl_b, vals_b = cl_and_vals_b
 
-    req_a = {a.name for a in attr.fields(cl_a)}
-    req_b = {a.name for a in attr.fields(cl_b)}
+    req_a = {a.name for a in fields(cl_a)}
+    req_b = {a.name for a in fields(cl_b)}
 
     assume(len(req_a))
     assume(len(req_b))
@@ -79,4 +79,4 @@ def test_disambiguation(cl_and_vals_a, cl_and_vals_b):
 
     fn = create_uniq_field_dis_func(cl_a, cl_b)
 
-    assert fn(attr.asdict(cl_a(*vals_a))) is cl_a
+    assert fn(asdict(cl_a(*vals_a))) is cl_a

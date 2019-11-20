@@ -1,4 +1,4 @@
-from cattr.multistrategy_dispatch import MultiStrategyDispatch
+from convclasses.multistrategy_dispatch import MultiStrategyDispatch
 
 
 class Foo(object):

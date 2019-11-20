@@ -1,5 +1,5 @@
 import pytest
-from cattr.function_dispatch import FunctionDispatch
+from convclasses.function_dispatch import FunctionDispatch
 
 
 def test_function_dispatch():

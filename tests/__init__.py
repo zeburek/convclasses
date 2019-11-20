@@ -2,7 +2,6 @@ import string
 import keyword
 import os
 
-from collections import OrderedDict
 from enum import Enum
 from typing import (
     Any,
@@ -16,11 +15,12 @@ from typing import (
     Set,
     Tuple,
 )
-from cattr._compat import is_py2, bytes, unicode
 
-import attr
+import typing
 
-from attr import make_class, NOTHING
+from convclasses._compat import is_py2, bytes, unicode
+
+from dataclasses import make_dataclass, MISSING, field
 from hypothesis import strategies as st, settings, HealthCheck
 
 settings.register_profile(
@@ -45,6 +45,18 @@ else:
             (st.text(), unicode),
             (st.binary(), bytes),
         ]
+    )
+
+
+def _get_field(_type=None, **kwargs):
+    f = field(**kwargs)
+    f.type = _type
+    return f
+
+
+def fields_sorting(t):
+    return (t[0].default is not MISSING) or (
+        t[0].default_factory is not MISSING
     )
 
 
@@ -180,17 +192,15 @@ def _create_hyp_class(attrs_and_strategy):
     instantiate it.
     """
 
-    def key(t):
-        return t[0].default is not NOTHING
-
-    attrs_and_strat = sorted(attrs_and_strategy, key=key)
+    attrs_and_strat = sorted(attrs_and_strategy, key=fields_sorting)
     attrs = [a[0] for a in attrs_and_strat]
-    for i, a in enumerate(attrs):
-        a.counter = i
     vals = tuple((a[1]) for a in attrs_and_strat)
     return st.tuples(
         st.just(
-            make_class("HypClass", OrderedDict(zip(gen_attr_names(), attrs)))
+            make_dataclass(
+                "HypClass",
+                zip(gen_attr_names(), [a.type for a in attrs], attrs),
+            )
         ),
         st.tuples(*vals),
     )
@@ -198,37 +208,46 @@ def _create_hyp_class(attrs_and_strategy):
 
 def just_class(tup):
     nested_cl = tup[1][0]
-    default = attr.Factory(nested_cl)
     combined_attrs = list(tup[0])
-    combined_attrs.append((attr.ib(default=default), st.just(nested_cl())))
+    combined_attrs.append(
+        (_get_field(default_factory=nested_cl), st.just(nested_cl()))
+    )
     return _create_hyp_class(combined_attrs)
 
 
 def just_class_with_type(tup):
     nested_cl = tup[1][0]
-    default = attr.Factory(nested_cl)
     combined_attrs = list(tup[0])
     combined_attrs.append(
-        (attr.ib(default=default, type=nested_cl), st.just(nested_cl()))
+        (
+            _get_field(default_factory=nested_cl, _type=nested_cl),
+            st.just(nested_cl()),
+        )
     )
     return _create_hyp_class(combined_attrs)
 
 
 def list_of_class(tup):
     nested_cl = tup[1][0]
-    default = attr.Factory(lambda: [nested_cl()])
     combined_attrs = list(tup[0])
-    combined_attrs.append((attr.ib(default=default), st.just([nested_cl()])))
+    combined_attrs.append(
+        (
+            _get_field(default_factory=lambda: [nested_cl()]),
+            st.just([nested_cl()]),
+        )
+    )
     return _create_hyp_class(combined_attrs)
 
 
 def list_of_class_with_type(tup):
     nested_cl = tup[1][0]
-    default = attr.Factory(lambda: [nested_cl()])
     combined_attrs = list(tup[0])
     combined_attrs.append(
         (
-            attr.ib(default=default, type=List[nested_cl]),
+            _get_field(
+                default_factory=lambda: [nested_cl()],
+                _type=typing.List[nested_cl],
+            ),
             st.just([nested_cl()]),
         )
     )
@@ -237,10 +256,12 @@ def list_of_class_with_type(tup):
 
 def dict_of_class(tup):
     nested_cl = tup[1][0]
-    default = attr.Factory(lambda: {"cls": nested_cl()})
     combined_attrs = list(tup[0])
     combined_attrs.append(
-        (attr.ib(default=default), st.just({"cls": nested_cl()}))
+        (
+            _get_field(default_factory=lambda: {"cls": nested_cl()}),
+            st.just({"cls": nested_cl()}),
+        )
     )
     return _create_hyp_class(combined_attrs)
 
@@ -275,10 +296,10 @@ def bare_attrs(draw, defaults=None):
     Generate a tuple of an attribute and a strategy that yields values
     appropriate for that attribute.
     """
-    default = NOTHING
+    default = MISSING
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = None
-    return (attr.ib(default=default), st.just(None))
+    return _get_field(default=default), st.just(None)
 
 
 @st.composite
@@ -287,10 +308,10 @@ def int_attrs(draw, defaults=None):
     Generate a tuple of an attribute and a strategy that yields ints for that
     attribute.
     """
-    default = NOTHING
+    default = MISSING
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = draw(st.integers())
-    return (attr.ib(default=default), st.integers())
+    return _get_field(default=default), st.integers()
 
 
 @st.composite
@@ -299,14 +320,14 @@ def str_attrs(draw, defaults=None, type_annotations=None):
     Generate a tuple of an attribute and a strategy that yields strs for that
     attribute.
     """
-    default = NOTHING
+    default = MISSING
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = draw(st.text())
     if (type_annotations is None and draw(st.booleans())) or type_annotations:
         type = unicode
     else:
         type = None
-    return (attr.ib(default=default, type=type), st.text())
+    return _get_field(default=default, _type=type), st.text()
 
 
 @st.composite
@@ -315,10 +336,10 @@ def float_attrs(draw, defaults=None):
     Generate a tuple of an attribute and a strategy that yields floats for that
     attribute.
     """
-    default = NOTHING
+    default = MISSING
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = draw(st.floats())
-    return (attr.ib(default=default), st.floats())
+    return _get_field(default=default), st.floats()
 
 
 @st.composite
@@ -327,12 +348,16 @@ def dict_attrs(draw, defaults=None):
     Generate a tuple of an attribute and a strategy that yields dictionaries
     for that attribute. The dictionaries map strings to integers.
     """
-    default = NOTHING
+    default = MISSING
     val_strat = st.dictionaries(keys=st.text(), values=st.integers())
     if defaults is True or (defaults is None and draw(st.booleans())):
         default_val = draw(val_strat)
-        default = attr.Factory(lambda: default_val)
-    return (attr.ib(default=default), val_strat)
+
+        def meth():
+            return default_val
+
+        default = meth
+    return _get_field(default_factory=default), val_strat
 
 
 def simple_attrs(defaults=None):
@@ -348,7 +373,7 @@ def simple_attrs(defaults=None):
 def lists_of_attrs(defaults=None):
     # Python functions support up to 255 arguments.
     return st.lists(simple_attrs(defaults), max_size=10).map(
-        lambda l: sorted(l, key=lambda t: t[0]._default is not NOTHING)
+        lambda l: sorted(l, key=fields_sorting)
     )
 
 
