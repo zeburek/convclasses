@@ -11,7 +11,7 @@ from typing import (  # noqa: F401, imported for Mypy.
     Type,
 )
 
-from attr import fields
+from dataclasses import fields
 
 
 def create_uniq_field_dis_func(*classes):
@@ -26,7 +26,7 @@ def create_uniq_field_dis_func(*classes):
         raise ValueError("At least two classes have no attributes.")
     # TODO: Deal with a single class having no required attrs.
     # For each class, attempt to generate a single unique required field.
-    uniq_attrs_dict = OrderedDict()  # type: Dict[str, Type]
+    uniq_data_dict = OrderedDict()  # type: Dict[str, Type]
     cls_and_attrs.sort(key=lambda c_a: -len(c_a[1]))
 
     fallback = None  # If none match, try this.
@@ -39,7 +39,7 @@ def create_uniq_field_dis_func(*classes):
             if not uniq:
                 m = "{} has no usable unique attributes.".format(cl)
                 raise ValueError(m)
-            uniq_attrs_dict[next(iter(uniq))] = cl
+            uniq_data_dict[next(iter(uniq))] = cl
         else:
             fallback = cl
 
@@ -47,7 +47,7 @@ def create_uniq_field_dis_func(*classes):
         # type: (Mapping) -> Optional[Type]
         if not isinstance(data, Mapping):
             raise ValueError("Only input mappings are supported.")
-        for k, v in uniq_attrs_dict.items():
+        for k, v in uniq_data_dict.items():
             if k in data:
                 return v
         return fallback

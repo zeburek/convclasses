@@ -181,7 +181,7 @@ obj = Dignissim(
 converter = cattr.Converter()
 
 def bench():
-    unstructured = converter.unstructure_attrs_asdict(obj)
-    converter.structure_attrs_fromdict(unstructured, obj.__class__)
+    unstructured = converter.unstructure_dataclass_asdict(obj)
+    converter.structure_dataclass_fromdict(unstructured, obj.__class__)
 
 cProfile.run('''for i in range(25000): bench()''', sort='tottime')

@@ -1,24 +1,6 @@
-======
-cattrs
-======
-
-
-.. image:: https://img.shields.io/pypi/v/cattrs.svg
-        :target: https://pypi.python.org/pypi/cattrs
-
-.. image:: https://img.shields.io/travis/Tinche/cattrs.svg
-        :target: https://travis-ci.org/Tinche/cattrs
-
-.. image:: https://readthedocs.org/projects/cattrs/badge/?version=latest
-        :target: https://cattrs.readthedocs.io/en/latest/?badge=latest
-        :alt: Documentation Status
-
-.. image:: https://img.shields.io/pypi/pyversions/cattrs.svg
-        :target: https://github.com/Tinche/cattrs
-        :alt: Supported Python versions
-
-.. image:: https://codecov.io/gh/Tinche/cattrs/branch/master/graph/badge.svg
-        :target: https://codecov.io/gh/Tinche/cattrs
+===========
+convclasses
+===========
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/ambv/black
@@ -52,7 +34,7 @@ strings.
 Here's a simple taste. The list containing a float, an int and a string
 gets converted into a tuple of three ints.
 
-.. doctest::
+.. code-block:: python
 
     >>> import cattr
     >>> from typing import Tuple
@@ -62,7 +44,7 @@ gets converted into a tuple of three ints.
 
 ``cattrs`` works well with ``attrs`` classes out of the box.
 
-.. doctest::
+.. code-block:: python
 
     >>> import attr, cattr
     >>>
@@ -80,7 +62,7 @@ gets converted into a tuple of three ints.
 Here's a much more complex example, involving ``attrs`` classes with type
 metadata.
 
-.. doctest::
+.. code-block:: python
 
     >>> from enum import unique, Enum
     >>> from typing import List, Optional, Sequence, Union

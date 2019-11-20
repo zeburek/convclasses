@@ -9,11 +9,7 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 requirements = [
-    "attrs >= 17.3",
-    "functools32 >= 3.2.3; python_version<'3.0'",
-    "singledispatch >= 3.4.0.3; python_version<'3.0'",
-    "enum34 >= 1.1.6; python_version<'3.0'",
-    "typing >= 3.5.3; python_version<'3.0'",
+    "dataclasses >= 0.7; python_version<'3.8'",
 ]
 
 dev_reqs = [
@@ -30,13 +26,13 @@ dev_reqs = [
 ]
 
 setup(
-    name="cattrs",
-    version="1.0.0rc0",
-    description="Composable complex class support for attrs.",
+    name="convclasses",
+    version="1.0.0",
+    description="Complex custom class converters for dataclasses",
     long_description=readme + "\n\n" + history,
-    author="Tin Tvrtković",
-    author_email="tinchester@gmail.com",
-    url="https://github.com/Tinche/cattrs",
+    author="Parviz Khavari",
+    author_email="me@parviz.pw",
+    url="https://github.com/zeburek/convclasses",
     packages=find_packages(where="src", exclude=["tests*"]),
     package_dir={"": "src"},
     include_package_data=True,
@@ -44,15 +40,12 @@ setup(
     extras_require={"dev": dev_reqs},
     license="MIT license",
     zip_safe=False,
-    keywords="cattrs",
+    keywords="convclasses",
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
-        "Programming Language :: Python :: 2.7",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
