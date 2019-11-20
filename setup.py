@@ -9,7 +9,7 @@ with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
 requirements = [
-    "dataclasses >= 0.7; python_version<'3.8'",
+    "dataclasses == 0.7; python_version=='3.6'",
 ]
 
 dev_reqs = [
