@@ -12,7 +12,7 @@ def converter():
 
 settings.register_profile(
     "tests",
-    suppress_health_check=(HealthCheck.too_slow,),
+    suppress_health_check=(HealthCheck.too_slow, HealthCheck.filter_too_much),
     deadline=None,
     verbosity=Verbosity.verbose,
 )
