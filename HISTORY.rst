@@ -33,11 +33,12 @@ cattrs history
 
 * Removed the undocumented ``Converter.unstruct_strat`` property setter.
 * Removed the ability to set the ``Converter.structure_attrs`` instance field.
-  As an alternative, create a new ``Converter``::
+  As an alternative, create a new ``Converter``:
 
 .. code-block:: python
 
     >>> converter = cattr.Converter(unstruct_strat=cattr.UnstructureStrategy.AS_TUPLE)
+
 * Some micro-optimizations were applied; a ``structure(unstructure(obj))`` roundtrip
   is now up to 2 times faster.
 
@@ -56,6 +57,7 @@ cattrs history
 * Attributes with default values can now be structured if they are missing in the input.
   (`#15 <https://github.com/Tinche/cattrs/pull/15>`_)
 * `Optional` attributes can no longer be structured if they are missing in the input.
+
 In other words, this no longer works:
 
 .. code-block:: python
