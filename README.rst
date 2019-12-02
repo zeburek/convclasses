@@ -2,14 +2,23 @@
 convclasses
 ===========
 
+.. image:: https://github.com/zeburek/convclasses/workflows/Test%20package/badge.svg
+    :target: https://github.com/zeburek/convclasses/actions
+
+.. image:: https://badge.fury.io/py/convclasses.svg
+    :target: https://badge.fury.io/py/convclasses
+
+.. image:: https://pepy.tech/badge/convclasses
+    :target: https://pepy.tech/project/convclasses
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/ambv/black
 
 
 ----
 
-``cattrs`` is an open source Python library for structuring and unstructuring
-data. ``cattrs`` works best with ``attrs`` classes and the usual Python
+``convclasses`` is an open source Python library for structuring and unstructuring
+data. ``convclasses`` works best with ``dataclasses`` classes and the usual Python
 collections, but other kinds of classes are supported by manually registering
 converters.
 
@@ -22,13 +31,13 @@ Data types like this, and mappings like ``dict`` s in particular, represent
 unstructured data. Your data is, in all likelihood, structured: not all
 combinations of field names are values are valid inputs to your programs. In
 Python, structured data is better represented with classes and enumerations.
-``attrs`` is an excellent library for declaratively describing the structure of
+``dataclasses`` is an excellent library for declaratively describing the structure of
 your data, and validating it.
 
 When you're handed unstructured data (by your network, file system, database...),
-``cattrs`` helps to convert this data into structured data. When you have to
+``convclasses`` helps to convert this data into structured data. When you have to
 convert your structured data into data types other libraries can handle,
-``cattrs`` turns your classes and enumerations into dictionaries, integers and
+``convclasses`` turns your classes and enumerations into dictionaries, integers and
 strings.
 
 Here's a simple taste. The list containing a float, an int and a string
@@ -42,7 +51,7 @@ gets converted into a tuple of three ints.
     >>> convclasses.structure([1.0, 2, "3"], Tuple[int, int, int])
     (1, 2, 3)
 
-``cattrs`` works well with ``attrs`` classes out of the box.
+``convclasses`` works well with ``dataclasses`` classes out of the box.
 
 .. code-block:: python
 
@@ -60,7 +69,7 @@ gets converted into a tuple of three ints.
     >>> convclasses.structure({'a': 1, 'b': 'a'}, C)
     C(a=1, b='a')
 
-Here's a much more complex example, involving ``attrs`` classes with type
+Here's a much more complex example, involving ``dataclasses`` classes with type
 metadata.
 
 .. code-block:: python
@@ -102,13 +111,13 @@ metadata.
 Consider unstructured data a low-level representation that needs to be converted
 to structured data to be handled, and use ``structure``. When you're done,
 ``unstructure`` the data to its unstructured form and pass it along to another
-library or module. Use `attrs type metadata <http://attrs.readthedocs.io/en/stable/examples.html#types>`_
-to add type metadata to attributes, so ``cattrs`` will know how to structure and
+library or module. Use `dataclasses type metadata <https://docs.python.org/3/library/dataclasses.html>`_
+to add type metadata to attributes, so ``convclasses`` will know how to structure and
 destructure them.
 
 * Free software: MIT license
-* Documentation: https://cattrs.readthedocs.io.
-* Python versions supported: 2.7, 3.5 and up.
+* Documentation: https://convclasses.readthedocs.io.
+* Python versions supported: 3.6 and up.
 
 
 Features
@@ -116,10 +125,11 @@ Features
 
 * Converts structured data into unstructured data, recursively:
 
-  * ``attrs`` classes are converted into dictionaries in a way similar to ``attr.asdict``, or into tuples in a way similar to ``attr.astuple``.
+  * ``dataclasses`` classes are converted into dictionaries in a way similar to ``dataclasses.asdict``,
+    or into tuples in a way similar to ``dataclasses.astuple``.
   * Enumeration instances are converted to their values.
   * Other types are let through without conversion. This includes types such as
-    integers, dictionaries, lists and instances of non-``attrs`` classes.
+    integers, dictionaries, lists and instances of non-``dataclasses`` classes.
   * Custom converters for any type can be registered using ``register_unstructure_hook``.
 
 * Converts unstructured data into structured data, recursively, according to
@@ -131,14 +141,14 @@ Features
   * ``typing.MutableSet[T]``, ``typing.Set[T]`` (converts to a set).
   * ``typing.FrozenSet[T]`` (converts to a frozenset).
   * ``typing.Dict[K, V]``, ``typing.MutableMapping[K, V]``, ``typing.Mapping[K, V]`` (converts to a dict).
-  * ``attrs`` classes with simple attributes and the usual ``__init__``.
+  * ``dataclasses`` classes with simple attributes and the usual ``__init__``.
 
     * Simple attributes are attributes that can be assigned unstructured data,
       like numbers, strings, and collections of unstructured data.
 
-  * All `attrs` classes with the usual ``__init__``, if their complex attributes
+  * All `dataclasses` classes with the usual ``__init__``, if their complex attributes
     have type metadata.
-  * ``typing.Union`` s of supported ``attrs`` classes, given that all of the classes
+  * ``typing.Union`` s of supported ``dataclasses`` classes, given that all of the classes
     have a unique field.
   * ``typing.Union`` s of anything, given that you provide a disambiguation
     function for it.
@@ -147,19 +157,20 @@ Features
 Credits
 -------
 
+Major credits and best wishes for the original creator of this concept - Tinche_,
+he developed cattrs_ which this project is fork of.
+
 Major credits to Hynek Schlawack for creating attrs_ and its predecessor,
 characteristic_.
 
-``cattrs`` is tested with Hypothesis_, by David R. MacIver.
+``convclasses`` is tested with Hypothesis_, by David R. MacIver.
 
-``cattrs`` is benchmarked using perf_, by Victor Stinner.
-
-This package was created with Cookiecutter_ and the `audreyr/cookiecutter-pypackage`_ project template.
+``convclasses`` is benchmarked using perf_, by Victor Stinner.
 
 .. _attrs: https://github.com/hynek/attrs
 .. _characteristic: https://github.com/hynek/characteristic
 .. _Hypothesis: http://hypothesis.readthedocs.io/en/latest/
 .. _perf: https://github.com/haypo/perf
-.. _Cookiecutter: https://github.com/audreyr/cookiecutter
-.. _`audreyr/cookiecutter-pypackage`: https://github.com/audreyr/cookiecutter-pypackage
+.. _cattrs: https://github.com/Tinche/cattrs
+.. _Tinche: https://github.com/Tinche
 

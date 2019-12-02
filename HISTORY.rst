@@ -2,7 +2,7 @@
 History
 =======
 
-1.0.0 (UNRELEASED)
+1.0.0
 ------------------
 * Rename ``cattrs`` into ``conclasses``
 * Move convclasses from ``attrs`` usage onto ``dataclasses``
