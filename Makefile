@@ -33,8 +33,6 @@ clean-build: ## remove build artifacts
 	rm -fr build/
 	rm -fr dist/
 	rm -fr .eggs/
-	find . -name '*.egg-info' -exec rm -fr {} +
-	find . -name '*.egg' -exec rm -f {} +
 
 clean-pyc: ## remove Python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
@@ -48,7 +46,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint: ## check style with flake8
-	flake8 cattr tests
+	flake8 convclasses tests
 
 test: ## run tests quickly with the default Python
 	py.test
@@ -58,16 +56,16 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source cattr -m pytest
+	coverage run --source convclasses -m pytest
 
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate Sphinx HTML documentation, including API docs
-	rm -f docs/cattr.rst
+	rm -f docs/convclasses.rst
 	rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ src/cattr
+	sphinx-apidoc -o docs/ src/convclasses
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs doctest
 	$(MAKE) -C docs html

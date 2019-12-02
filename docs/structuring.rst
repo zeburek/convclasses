@@ -2,9 +2,9 @@
 What you can structure and how
 ==============================
 
-The philosophy of ``cattrs`` structuring is simple: give it an instance of Python
+The philosophy of ``convclasses`` structuring is simple: give it an instance of Python
 built-in types and collections, and a type describing the data you want out.
-``cattrs`` will convert the input data into the type you want, or throw an
+``convclasses`` will convert the input data into the type you want, or throw an
 exception.
 
 All loading conversions are composable, where applicable. This is
@@ -21,10 +21,10 @@ loading; it will simply be passed through.
 
 .. doctest::
 
-    >>> cattr.structure(1, Any)
+    >>> convclasses.structure(1, Any)
     1
     >>> d = {1: 1}
-    >>> cattr.structure(d, Any) is d
+    >>> convclasses.structure(d, Any) is d
     True
 
 ``int``, ``float``, ``str``, ``bytes``
@@ -34,9 +34,9 @@ Use any of these primitive types to convert the object to the type.
 
 .. doctest::
 
-    >>> cattr.structure(1, str)
+    >>> convclasses.structure(1, str)
     '1'
-    >>> cattr.structure("1", float)
+    >>> convclasses.structure("1", float)
     1.0
 
 In case the conversion isn't possible, the expected exceptions will be
@@ -45,7 +45,7 @@ do the conversion yourself, directly.
 
 .. code-block:: python
 
-    >>> cattr.structure("not-an-int", int)
+    >>> convclasses.structure("not-an-int", int)
     Traceback (most recent call last):
     ...
     ValueError: invalid literal for int() with base 10: 'not-an-int'
@@ -64,14 +64,14 @@ like tuples.
     ...    MAINE_COON = "maine_coon"
     ...    SACRED_BIRMAN = "birman"
     ...
-    >>> cattr.structure("siamese", CatBreed)
+    >>> convclasses.structure("siamese", CatBreed)
     <CatBreed.SIAMESE: 'siamese'>
 
 Again, in case of errors, the expected exceptions will fly out.
 
 .. code-block:: python
 
-    >>> cattr.structure("alsatian", CatBreed)
+    >>> convclasses.structure("alsatian", CatBreed)
     Traceback (most recent call last):
     ...
     ValueError: 'alsatian' is not a valid CatBreed
@@ -86,11 +86,11 @@ Optionals
 
 .. doctest::
 
-    >>> cattr.structure(None, int)
+    >>> convclasses.structure(None, int)
     Traceback (most recent call last):
     ...
     TypeError: int() argument must be a string, a bytes-like object or a number, not 'NoneType'
-    >>> cattr.structure(None, Optional[int])
+    >>> convclasses.structure(None, Optional[int])
     >>> # None was returned.
 
 Bare ``Optional`` s (non-parameterized, just ``Optional``, as opposed to
@@ -100,7 +100,7 @@ This generic type is composable with all other converters.
 
 .. doctest::
 
-    >>> cattr.structure(1, Optional[float])
+    >>> convclasses.structure(1, Optional[float])
     1.0
 
 Lists
@@ -118,14 +118,14 @@ copy an iterable into a list. A bare type, for example ``Sequence`` instead of
 
 .. doctest::
 
-    >>> cattr.structure((1, 2, 3), MutableSequence[int])
+    >>> convclasses.structure((1, 2, 3), MutableSequence[int])
     [1, 2, 3]
 
 These generic types are composable with all other converters.
 
 .. doctest::
 
-    >>> cattr.structure((1, None, 3), List[Optional[str]])
+    >>> convclasses.structure((1, None, 3), List[Optional[str]])
     ['1', None, '3']
 
 Sets and frozensets
@@ -147,14 +147,14 @@ instead of ``MutableSet[int]``, is equivalent to ``MutableSet[Any]``.
 
 .. doctest::
 
-    >>> cattr.structure([1, 2, 3, 4], Set)
+    >>> convclasses.structure([1, 2, 3, 4], Set)
     {1, 2, 3, 4}
 
 These generic types are composable with all other converters.
 
 .. doctest::
 
-    >>> cattr.structure([[1, 2], [3, 4]], Set[FrozenSet[str]])
+    >>> convclasses.structure([[1, 2], [3, 4]], Set[FrozenSet[str]])
     {frozenset({'1', '2'}), frozenset({'4', '3'})}
 
 Dictionaries
@@ -177,7 +177,7 @@ they will be treated as ``Any`` too.
 .. doctest::
 
     >>> from collections import OrderedDict
-    >>> cattr.structure(OrderedDict([(1, 2), (3, 4)]), Dict)
+    >>> convclasses.structure(OrderedDict([(1, 2), (3, 4)]), Dict)
     {1: 2, 3: 4}
 
 These generic types are composable with all other converters. Note both keys
@@ -185,7 +185,7 @@ and values can be converted.
 
 .. doctest::
 
-    >>> cattr.structure({1: None, 2: 2.0}, Dict[str, Optional[int]])
+    >>> convclasses.structure({1: None, 2: 2.0}, Dict[str, Optional[int]])
     {'1': None, '2': 2}
 
 Homogeneous and heterogeneous tuples
@@ -206,14 +206,14 @@ In all cases a tuple will be returned. Any type parameters set to
 
 .. doctest::
 
-    >>> cattr.structure([1, 2, 3], Tuple[int, str, float])
+    >>> convclasses.structure([1, 2, 3], Tuple[int, str, float])
     (1, '2', 3.0)
 
 The tuple conversion is composable with all other converters.
 
 .. doctest::
 
-    >>> cattr.structure([{1: 1}, {2: 2}], Tuple[Dict[str, float], ...])
+    >>> convclasses.structure([{1: 1}, {2: 2}], Tuple[Dict[str, float], ...])
     ({'1': 1.0}, {'2': 2.0})
 
 Unions
@@ -225,29 +225,29 @@ Unions of ``NoneType`` and a single other type are supported (also known as
 Automatic Disambiguation
 """"""""""""""""""""""""
 
-In the case of a union consisting exclusively of ``attrs`` classes, ``cattrs``
+In the case of a union consisting exclusively of ``dataclasses`` classes, ``convclasses``
 will attempt to generate a disambiguation function automatically; this will
 succeed only if each class has a unique field. Given the following classes:
 
 .. code-block:: python
 
-    >>> @attr.s
+    >>> @dataclass
     ... class A:
-    ...     a = attr.ib()
-    ...     x = attr.ib()
+    ...     a: Any
+    ...     x: Any
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class B:
-    ...     a = attr.ib()
-    ...     y = attr.ib()
+    ...     a: Any
+    ...     y: Any
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class C:
-    ...     a = attr.ib()
-    ...     z = attr.ib()
+    ...     a: Any
+    ...     z: Any
     ...
 
-``cattrs`` can deduce only instances of ``A`` will contain `x`, only instances
+``convclasses`` can deduce only instances of ``A`` will contain `x`, only instances
 of ``B`` will contain ``y``, etc. A disambiguation function using this
 information will then be generated and cached. This will happen automatically,
 the first time an appropriate union is structured.
@@ -258,50 +258,52 @@ Manual Disambiguation
 To support arbitrary unions, register a custom structuring hook for the union
 (see `Registering custom structuring hooks`_).
 
-``attrs`` classes
------------------
+``dataclasses`` classes
+-----------------------
 
-Simple ``attrs`` classes
-~~~~~~~~~~~~~~~~~~~~~~~~
+Simple ``dataclasses`` classes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``attrs`` classes using primitives, collections of primitives and their own
+``dataclasses`` classes using primitives, collections of primitives and their own
 converters work out of the box. Given a mapping ``d`` and class ``A``,
-``cattrs`` will simply instantiate ``A`` with ``d`` unpacked.
+``convclasses`` will simply instantiate ``A`` with ``d`` unpacked.
 
 .. doctest::
+   :pyversion: > 3.6
 
-    >>> @attr.s
+    >>> @dataclass
     ... class A:
-    ...     a = attr.ib()
-    ...     b = attr.ib(convert=int)
+    ...     a: Any
+    ...     b: int
     ...
-    >>> cattr.structure({'a': 1, 'b': '2'}, A)
+    >>> convclasses.structure({'a': 1, 'b': '2'}, A)
     A(a=1, b=2)
 
-``attrs`` classes deconstructed into tuples can be structured using
-``cattr.structure_attrs_fromtuple`` (``fromtuple`` as in the opposite of
-``attr.astuple`` and ``converter.unstructure_attrs_astuple``).
+``dataclasses`` classes deconstructed into tuples can be structured using
+``convclasses.structure_attrs_fromtuple`` (``fromtuple`` as in the opposite of
+``dataclasses.astuple`` and ``converter.unstructure_attrs_astuple``).
 
 .. doctest::
 
-    >>> @attr.s
+    >>> # Loading from tuples can be made the default by creating a new
+    ... @dataclass
     ... class A:
-    ...     a = attr.ib()
-    ...     b = attr.ib(convert=int)
+    ...     a: Any
+    ...     b: int
     ...
-    >>> cattr.structure_attrs_fromtuple(['string', '2'], A)
+    >>> convclasses.structure_dataclass_fromtuple(['string', '2'], A)
     A(a='string', b=2)
 
 Loading from tuples can be made the default by creating a new ``Converter`` with
-``unstruct_strat=cattr.UnstructureStrategy.AS_TUPLE``.
+``unstruct_strat=convclasses.UnstructureStrategy.AS_TUPLE``.
 
 .. doctest::
 
-    >>> converter = cattr.Converter(unstruct_strat=cattr.UnstructureStrategy.AS_TUPLE)
-    >>> @attr.s
+    >>> converter = convclasses.Converter(unstruct_strat=convclasses.UnstructureStrategy.AS_TUPLE)
+    >>> @dataclass
     ... class A:
-    ...     a = attr.ib()
-    ...     b = attr.ib(convert=int)
+    ...     a: Any
+    ...     b: int
     ...
     >>> converter.structure(['string', '2'], A)
     A(a='string', b=2)
@@ -309,49 +311,47 @@ Loading from tuples can be made the default by creating a new ``Converter`` with
 Structuring from tuples can also be made the default for specific classes only;
 see registering custom structure hooks below.
 
-Complex ``attrs`` classes
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Complex ``dataclasses`` classes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Complex ``attrs`` classes are classes with type information available for some
+Complex ``dataclasses`` classes are classes with type information available for some
 or all attributes. These classes support almost arbitrary nesting.
 
-Type information is supported by attrs directly, and can be set using type
-annotations when using Python 3.6+, or by passing the appropriate type to
-``attr.ib``.
+Type information can be set using type annotations when using Python 3.6+.
 
 .. doctest::
 
-    >>> @attr.s
+    >>> @dataclass
     ... class A:
-    ...     a: int = attr.ib()
+    ...     a: int
     ...
-    >>> attr.fields(A).a
-    Attribute(name='a', default=NOTHING, validator=None, repr=True, cmp=True, hash=None, init=True, metadata=mappingproxy({}), type=<class 'int'>, converter=None, kw_only=False)
+    >>> fields(A) #doctest: +ELLIPSIS
+    (Field(name='a',type=<class 'int'>,default=<dataclasses._MISSING_TYPE object at 0x...>,default_factory=<dataclasses._MISSING_TYPE object at 0x...>,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({}),_field_type=_FIELD),)
 
 Type information, when provided, can be used for all attribute types, not only
-attributes holding ``attrs`` classes.
+attributes holding ``dataclasses`` classes.
 
 .. doctest::
 
-    >>> @attr.s
+    >>> @dataclass
     ... class A:
-    ...     a: int = attr.ib(default=0)
+    ...     a: int = field(default=0)
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class B:
-    ...     b = attr.ib(type=A)  # Legacy syntax.
+    ...     b: A
     ...
-    >>> cattr.structure({'b': {'a': '1'}}, B)
+    >>> convclasses.structure({'b': {'a': '1'}}, B)
     B(b=A(a=1))
 
 Registering custom structuring hooks
 ------------------------------------
 
-``cattrs`` doesn't know how to structure non-``attrs`` classes by default,
+``convclasses`` doesn't know how to structure non-``dataclasses`` classes by default,
 so it has to be taught. This can be done by registering structuring hooks on
 a converter instance (including the global converter).
 
-Here's an example involving a simple, classic (i.e. non-``attrs``) Python class.
+Here's an example involving a simple, classic (i.e. non-``dataclasses``) Python class.
 
 .. doctest::
 
@@ -360,24 +360,23 @@ Here's an example involving a simple, classic (i.e. non-``attrs``) Python class.
     ...         self.a = a
     ...     def __repr__(self):
     ...         return f'C(a={self.a})'
-    >>> cattr.structure({'a': 1}, C)
+    >>> convclasses.structure({'a': 1}, C)
     Traceback (most recent call last):
     ...
     ValueError: Unsupported type: <class '__main__.C'>. Register a structure hook for it.
-    >>>
-    >>> cattr.register_structure_hook(C, lambda d, t: C(**d))
-    >>> cattr.structure({'a': 1}, C)
+    >>> convclasses.register_structure_hook(C, lambda d, t: C(**d))
+    >>> convclasses.structure({'a': 1}, C)
     C(a=1)
 
 The structuring hooks are callables that take two arguments: the object to
 convert to the desired class and the type to convert to.
 The type may seem redundant but is useful when dealing with generic types.
 
-When using ``cattr.register_structure_hook``, the hook will be registered on the global converter.
-If you want to avoid changing the global converter, create an instance of ``cattr.Converter`` and register the hook on that.
+When using ``convclasses.register_structure_hook``, the hook will be registered on the global converter.
+If you want to avoid changing the global converter, create an instance of ``convclasses.Converter`` and register the hook on that.
 
-In some situations, it is not possible to decide on the converter using typing mechanisms alone (such as with attrs classes). In these situations,
-cattrs provides a register_structure_func_hook instead, which accepts a function to determine whether that type can be handled instead.
+In some situations, it is not possible to decide on the converter using typing mechanisms alone (such as with dataclasses classes). In these situations,
+convclasses provides a register_structure_func_hook instead, which accepts a function to determine whether that type can be handled instead.
 
 The function-based hooks are evaluated after the class-based hooks. In the case where both a class-based hook and a function-based hook are present, the class-based hook will be used.
 
@@ -392,6 +391,6 @@ The function-based hooks are evaluated after the class-based hooks. In the case 
     ...     @classmethod
     ...     def deserialize(cls, data):
     ...         return cls(data["a"])
-    >>> cattr.register_structure_hook_func(lambda cls: getattr(cls, "custom", False), lambda d, t: t.deserialize(d))
-    >>> cattr.structure({'a': 2}, D)
+    >>> convclasses.register_structure_hook_func(lambda cls: getattr(cls, "custom", False), lambda d, t: t.deserialize(d))
+    >>> convclasses.structure({'a': 2}, D)
     D(a=2)

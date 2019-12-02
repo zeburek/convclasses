@@ -36,27 +36,28 @@ gets converted into a tuple of three ints.
 
 .. code-block:: python
 
-    >>> import cattr
+    >>> import convclasses
     >>> from typing import Tuple
     >>>
-    >>> cattr.structure([1.0, 2, "3"], Tuple[int, int, int])
+    >>> convclasses.structure([1.0, 2, "3"], Tuple[int, int, int])
     (1, 2, 3)
 
 ``cattrs`` works well with ``attrs`` classes out of the box.
 
 .. code-block:: python
 
-    >>> import attr, cattr
+    >>> import convclasses
+    ... from dataclasses import dataclass
     >>>
-    >>> @attr.s(slots=True, frozen=True)  # It works with normal classes too.
+    >>> @dataclass(slots=True, frozen=True)  # It works with normal classes too.
     ... class C:
     ...     a = attr.ib()
     ...     b = attr.ib()
     ...
     >>> instance = C(1, 'a')
-    >>> cattr.unstructure(instance)
+    >>> convclasses.unstructure(instance)
     {'a': 1, 'b': 'a'}
-    >>> cattr.structure({'a': 1, 'b': 'a'}, C)
+    >>> convclasses.structure({'a': 1, 'b': 'a'}, C)
     C(a=1, b='a')
 
 Here's a much more complex example, involving ``attrs`` classes with type
@@ -65,9 +66,9 @@ metadata.
 .. code-block:: python
 
     >>> from enum import unique, Enum
-    >>> from typing import List, Optional, Sequence, Union
-    >>> from cattr import structure, unstructure
-    >>> import attr
+    >>> from typing import Any, List, Optional, Sequence, Union
+    >>> from convclasses import structure, unstructure
+    >>> from dataclasses import dataclass
     >>>
     >>> @unique
     ... class CatBreed(Enum):
@@ -75,20 +76,20 @@ metadata.
     ...     MAINE_COON = "maine_coon"
     ...     SACRED_BIRMAN = "birman"
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class Cat:
-    ...     breed: CatBreed = attr.ib()
-    ...     names: Sequence[str] = attr.ib()
+    ...     breed: CatBreed
+    ...     names: Sequence[str]
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class DogMicrochip:
-    ...     chip_id = attr.ib()
-    ...     time_chipped: float = attr.ib()
+    ...     chip_id: Any
+    ...     time_chipped: float
     ...
     >>> @attr.s
     ... class Dog:
-    ...     cuteness: int = attr.ib()
-    ...     chip: Optional[DogMicrochip] = attr.ib()
+    ...     cuteness: int
+    ...     chip: Optional[DogMicrochip]
     ...
     >>> p = unstructure([Dog(cuteness=1, chip=DogMicrochip(chip_id=1, time_chipped=10.0)),
     ...                  Cat(breed=CatBreed.MAINE_COON, names=('Fluffly', 'Fluffer'))])

@@ -1,4 +1,4 @@
-* cattrs version:
+* convclasses version:
 * Python version:
 * Operating System:
 

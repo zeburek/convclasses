@@ -8,13 +8,14 @@ Installation
 Stable release
 --------------
 
-To install cattrs, run this command in your terminal:
+To install convclasses, run this command in your terminal:
 
 .. code-block:: console
 
-    $ pip install cattrs
+    $ pip install convclasses
 
-This is the preferred method to install cattrs, as it will always install the most recent stable release.
+This is the preferred method to install convclasses,
+as it will always install the most recent stable release.
 
 If you don't have `pip`_ installed, this `Python installation guide`_ can guide
 you through the process.
@@ -26,19 +27,19 @@ you through the process.
 From sources
 ------------
 
-The sources for cattrs can be downloaded from the `Github repo`_.
+The sources for convclasses can be downloaded from the `Github repo`_.
 
 You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/Tinche/cattrs
+    $ git clone git://github.com/zeburek/convclasses
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl  -OL https://github.com/Tinche/cattrs/tarball/master
+    $ curl  -OL https://github.com/zeburek/convclasses/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +48,5 @@ Once you have a copy of the source, you can install it with:
     $ pip install -e .
 
 
-.. _Github repo: https://github.com/Tinche/cattrs
-.. _tarball: https://github.com/Tinche/cattrs/tarball/master
+.. _Github repo: https://github.com/zeburek/convclasses
+.. _tarball: https://github.com/zeburek/convclasses/tarball/master

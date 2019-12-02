@@ -1,67 +1,67 @@
-from typing import Optional, List
+from typing import Any, Optional, List
 import enum
-import attr
-import cattr
+from dataclasses import dataclass, field
+import convclasses
 import cProfile
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Lorem:
-    ipsum = attr.ib()
-    dolor = attr.ib()
-    sit = attr.ib()
-    amet = attr.ib()
-    consectetur = attr.ib()
-    adipiscing = attr.ib()
+    ipsum: Any
+    dolor: Any
+    sit: Any
+    amet: Any
+    consectetur: Any
+    adipiscing: Any
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Fugiat:
-    eiusmod = attr.ib()
-    tempor = attr.ib()
-    incididunt = attr.ib()
-    labore = attr.ib()
-    dolore = attr.ib()
-    magna = attr.ib()
-    aliqua = attr.ib()
-    veniam = attr.ib()
-    nostrud = attr.ib()
-    exercitation = attr.ib()
-    ullamco = attr.ib()
-    laboris = attr.ib()
-    commodo = attr.ib()
-    consequat = attr.ib()
-    aute = attr.ib()
+    eiusmod: Any
+    tempor: Any
+    incididunt: Any
+    labore: Any
+    dolore: Any
+    magna: Any
+    aliqua: Any
+    veniam: Any
+    nostrud: Any
+    exercitation: Any
+    ullamco: Any
+    laboris: Any
+    commodo: Any
+    consequat: Any
+    aute: Any
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Invenire:
-    irure = attr.ib()
-    reprehenderit = attr.ib()
-    voluptate = attr.ib()
-    velit = attr.ib()
-    esse = attr.ib()
-    cillum = attr.ib()
-    eepcillum = attr.ib()
+    irure: Any
+    reprehenderit: Any
+    voluptate: Any
+    velit: Any
+    esse: Any
+    cillum: Any
+    eepcillum: Any
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Tritani:
-    nulla = attr.ib()
-    name = attr.ib()
-    value = attr.ib()
-    pariatur = attr.ib()
-    exceptuer = attr.ib()
+    nulla: Any
+    name: Any
+    value: Any
+    pariatur: Any
+    exceptuer: Any
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Laborum:
-    type = attr.ib()
-    urangulal = attr.ib()
-    ipsumal = attr.ib()
-    occaecat = attr.ib()
-    cupidatat = attr.ib()
-    proident = attr.ib()
+    type: Any
+    urangulal: Any
+    ipsumal: Any
+    occaecat: Any
+    cupidatat: Any
+    proident: Any
 
 
 class Aliquip(enum.IntEnum):
@@ -72,28 +72,28 @@ class Aliquip(enum.IntEnum):
     Aliquip5 = 5
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Assentior:
-    aliquip = attr.ib(type=Aliquip)
-    culpa = attr.ib()
-    fugiat = attr.ib(type=Optional[Fugiat])
-    invenire = attr.ib(type=Optional[Invenire])
-    deserunt = attr.ib()
-    lorem = attr.ib(type=Optional[Lorem])
-    mollit = attr.ib()
-    laborums = attr.ib(type=Optional[List[Laborum]])
-    tantas = attr.ib()
-    nominati = attr.ib()
-    fabulas = attr.ib()
-    tritani = attr.ib(type=Optional[Tritani])
+    aliquip: Aliquip
+    culpa: Any
+    fugiat: Optional[Fugiat]
+    invenire: Optional[Invenire]
+    deserunt: Any
+    lorem: Optional[Lorem]
+    mollit: Any
+    laborums: Optional[List[Laborum]]
+    tantas: Any
+    nominati: Any
+    fabulas: Any
+    tritani: Optional[Tritani]
 
 
-@attr.s(slots=True, frozen=True)
+@dataclass(frozen=True)
 class Dignissim:
-    assentior = attr.ib(type=Assentior)
-    new_cupidatat = attr.ib()
-    laoreet = attr.ib()
-    rationibus = attr.ib()
+    assentior: Assentior
+    new_cupidatat: Any
+    laoreet: Any
+    rationibus: Any
 
 
 obj = Dignissim(
@@ -178,10 +178,12 @@ obj = Dignissim(
 )
 
 
-converter = cattr.Converter()
+converter = convclasses.Converter()
+
 
 def bench():
     unstructured = converter.unstructure_dataclass_asdict(obj)
     converter.structure_dataclass_fromdict(unstructured, obj.__class__)
+
 
 cProfile.run('''for i in range(25000): bench()''', sort='tottime')

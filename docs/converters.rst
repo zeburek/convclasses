@@ -2,8 +2,8 @@
 Converters
 ==========
 
-All ``cattrs`` functionality is exposed through a ``cattr.Converter`` object.
-Global ``cattrs`` functions, such as ``cattr.unstructure()``, use a single
+All ``convclasses`` functionality is exposed through a ``convclasses.Converter`` object.
+Global ``convclasses`` functions, such as ``convclasses.unstructure()``, use a single
 global converter. Changes done to this global converter, such as registering new
 ``structure`` and ``unstructure`` hooks, affect all code using the global
 functions.
@@ -11,13 +11,13 @@ functions.
 Global converter
 ----------------
 
-A global converter is provided for convenience as ``cattr.global_converter``.
+A global converter is provided for convenience as ``convclasses.global_converter``.
 The following functions implicitly use this global converter:
 
-* ``cattr.structure``
-* ``cattr.unstructure``
-* ``cattr.structure_attr_fromtuple``
-* ``cattr.structure_attr_fromdict``
+* ``convclasses.structure``
+* ``convclasses.unstructure``
+* ``convclasses.structure_dataclass_fromtuple``
+* ``convclasses.structure_dataclass_fromdict``
 
 Changes made to the global converter will affect the behavior of these
 functions.
@@ -28,7 +28,7 @@ private instance of ``Converter``.
 Converter objects
 -----------------
 
-To create a private converter, simply instantiate a ``cattr.Converter``.
+To create a private converter, simply instantiate a ``convclasses.Converter``.
 Currently, a converter contains the following state:
 
 * a registry of unstructure hooks, backed by a ``singledispatch`` and a ``function_dispatch``.
@@ -36,4 +36,4 @@ Currently, a converter contains the following state:
 * a LRU cache of union disambiguation functions.
 * a reference to an unstructuring strategy (either AS_DICT or AS_TUPLE).
 * a ``dict_factory`` callable, used for creating ``dicts`` when dumping
-  ``attrs`` classes using AS_DICT.
+  ``dataclasses`` classes using AS_DICT.

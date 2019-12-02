@@ -7,7 +7,7 @@ instances of complex classes) into simple, unstructured data (like
 dictionaries).
 
 Unstructuring is simpler than structuring in that no target types are required.
-Simply provide an argument to ``unstructure`` and ``cattrs`` will produce a
+Simply provide an argument to ``unstructure`` and ``convclasses`` will produce a
 result based on the registered unstructuring hooks. A number of default
 unstructuring hooks are documented here.
 
@@ -29,33 +29,31 @@ a complex or recursive collection.
     >>> # A dictionary of strings to lists of tuples of floats.
     >>> data = {'a': [(1.0, 2.0), (3.0, 4.0)]}
     >>>
-    >>> copy = cattr.unstructure(data)
+    >>> copy = convclasses.unstructure(data)
     >>> data == copy
     True
     >>> data is copy
     False
 
 
-``attrs`` classes
------------------
+``dataclasses`` classes
+-----------------------
 
-``attrs`` classes are supported out of the box. :class:`.Converter` s
+``dataclasses`` classes are supported out of the box. :class:`.Converter` s
 support two unstructuring strategies:
 
-    * ``UnstructureStrategy.AS_DICT`` - similar to ``attr.asdict``, unstructures ``attrs`` instances into dictionaries. This is the default.
-    * ``UnstructureStrategy.AS_TUPLE`` - similar to ``attr.astuple``, unstructures ``attrs`` instances into tuples.
+    * ``UnstructureStrategy.AS_DICT`` - similar to ``dataclasses.asdict``, unstructures ``dataclasses`` instances into dictionaries. This is the default.
+    * ``UnstructureStrategy.AS_TUPLE`` - similar to ``dataclasses.astuple``, unstructures ``dataclasses`` instances into tuples.
 
 .. doctest::
 
-    >>> @attr.s
+    >>> @dataclass
     ... class C:
-    ...     a = attr.ib()
-    ...     b = attr.ib()
+    ...     a: Any
+    ...     b: Any
     ...
     >>> inst = C(1, 'a')
-    >>>
-    >>> converter = cattr.Converter(unstruct_strat=cattr.UnstructureStrategy.AS_TUPLE)
-    >>>
+    >>> converter = convclasses.Converter(unstruct_strat=convclasses.UnstructureStrategy.AS_TUPLE)
     >>> converter.unstructure(inst)
     (1, 'a')
 
@@ -67,25 +65,25 @@ and :meth:`.Converter.unstructure_attrs_astuple`. These methods can be used with
 custom unstructuring hooks to selectively apply one strategy to instances of
 particular classes.
 
-Assume two nested ``attrs`` classes, ``Inner`` and ``Outer``; instances of
+Assume two nested ``dataclasses`` classes, ``Inner`` and ``Outer``; instances of
 ``Outer`` contain instances of ``Inner``. Instances of ``Outer`` should be
 unstructured as dictionaries, and instances of ``Inner`` as tuples. Here's how
 to do this.
 
 .. doctest::
 
-    >>> @attr.s
+    >>> @dataclass
     ... class Inner:
-    ...     a: int = attr.ib()
+    ...     a: int
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class Outer:
-    ...     i: Inner = attr.ib()
+    ...     i: Inner
     ...
     >>> inst = Outer(i=Inner(a=1))
     >>>
-    >>> converter = cattr.Converter()
-    >>> converter.register_unstructure_hook(Inner, converter.unstructure_attrs_astuple)
+    >>> converter = convclasses.Converter()
+    >>> converter.register_unstructure_hook(Inner, converter.unstructure_dataclass_astuple)
     >>>
     >>> converter.unstructure(inst)
     {'i': (1,)}
@@ -94,14 +92,14 @@ Of course, these methods can be used directly as well, without changing the conv
 
 .. doctest::
 
-    >>> @attr.s
+    >>> @dataclass
     ... class C:
-    ...     a: int = attr.ib()
-    ...     b: str = attr.ib()
+    ...     a: int
+    ...     b: str
     ...
     >>> inst = C(1, 'a')
     >>>
-    >>> converter = cattr.Converter()
+    >>> converter = convclasses.Converter()
     >>>
-    >>> converter.unstructure_attrs_astuple(inst)  # Default is AS_DICT.
+    >>> converter.unstructure_dataclass_astuple(inst)  # Default is AS_DICT.
     (1, 'a')
