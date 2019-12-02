@@ -1,9 +1,10 @@
 """Loading of attrs classes."""
 from typing import Any, Union
 
-from attr import asdict, astuple, Factory, fields, NOTHING
+import typing
+from dataclasses import asdict, astuple, fields, MISSING
 from hypothesis import assume, given
-from cattr.converters import Converter
+from convclasses.converters import Converter
 from hypothesis.strategies import data, lists, sampled_from
 
 from . import simple_classes
@@ -27,14 +28,14 @@ def test_structure_simple_from_dict_default(converter, cl_and_vals, data):
     """Test structuring non-nested attrs classes with default value."""
     cl, vals = cl_and_vals
     obj = cl(*vals)
-    attrs_with_defaults = [a for a in fields(cl) if a.default is not NOTHING]
+    attrs_with_defaults = [a for a in fields(cl) if a.default is not MISSING]
     to_remove = data.draw(
         lists(elements=sampled_from(attrs_with_defaults), unique=True)
     )
 
     for a in to_remove:
-        if isinstance(a.default, Factory):
-            setattr(obj, a.name, a.default.factory())
+        if isinstance(a.default, typing.Callable):
+            setattr(obj, a.name, a.default())
         else:
             setattr(obj, a.name, a.default)
 
@@ -64,7 +65,9 @@ def test_structure_tuple(converter, cl_and_vals):
     # type: (Converter, Any) -> None
     """Test loading from a tuple, by registering the loader."""
     cl, vals = cl_and_vals
-    converter.register_structure_hook(cl, converter.structure_attrs_fromtuple)
+    converter.register_structure_hook(
+        cl, converter.structure_dataclass_fromtuple
+    )
     obj = cl(*vals)
 
     dumped = astuple(obj)
@@ -76,7 +79,6 @@ def test_structure_tuple(converter, cl_and_vals):
 @given(simple_classes(defaults=False), simple_classes(defaults=False))
 def test_structure_union(converter, cl_and_vals_a, cl_and_vals_b):
     """Structuring of automatically-disambiguable unions works."""
-    # type: (Converter, Any, Any) -> None
     cl_a, vals_a = cl_and_vals_a
     cl_b, vals_b = cl_and_vals_b
     a_field_names = {a.name for a in fields(cl_a)}
@@ -96,7 +98,6 @@ def test_structure_union(converter, cl_and_vals_a, cl_and_vals_b):
 @given(simple_classes(defaults=False), simple_classes(defaults=False))
 def test_structure_union_none(converter, cl_and_vals_a, cl_and_vals_b):
     """Structuring of automatically-disambiguable unions works."""
-    # type: (Converter, Any, Any) -> None
     cl_a, vals_a = cl_and_vals_a
     cl_b, vals_b = cl_and_vals_b
     a_field_names = {a.name for a in fields(cl_a)}
@@ -118,7 +119,6 @@ def test_structure_union_none(converter, cl_and_vals_a, cl_and_vals_b):
 @given(simple_classes(), simple_classes())
 def test_structure_union_explicit(converter, cl_and_vals_a, cl_and_vals_b):
     """Structuring of manually-disambiguable unions works."""
-    # type: (Converter, Any, Any) -> None
     cl_a, vals_a = cl_and_vals_a
     cl_b, vals_b = cl_and_vals_b
 

@@ -1,4 +1,5 @@
 from enum import Enum
+from dataclasses import is_dataclass
 from typing import (  # noqa: F401, imported for Mypy.
     Any,
     Callable,
@@ -35,14 +36,10 @@ V = TypeVar("V")
 
 
 class UnstructureStrategy(Enum):
-    """`attrs` classes unstructuring strategies."""
+    """`dataclasses` unstructuring strategies."""
 
     AS_DICT = "asdict"
     AS_TUPLE = "astuple"
-
-
-def _is_attrs_class(cls):
-    return getattr(cls, "__attrs_attrs__", None) is not None
 
 
 def _subclass(typ):
@@ -56,8 +53,8 @@ class Converter(object):
     __slots__ = (
         "_dis_func_cache",
         "_unstructure_func",
-        "_unstructure_attrs",
-        "_structure_attrs",
+        "_unstructure_dataclass",
+        "_structure_dataclass",
         "_dict_factory",
         "_union_registry",
         "_structure_func",
@@ -70,11 +67,11 @@ class Converter(object):
 
         # Create a per-instance cache.
         if unstruct_strat is UnstructureStrategy.AS_DICT:
-            self._unstructure_attrs = self.unstructure_attrs_asdict
-            self._structure_attrs = self.structure_attrs_fromdict
+            self._unstructure_dataclass = self.unstructure_dataclass_asdict
+            self._structure_dataclass = self.structure_dataclass_fromdict
         else:
-            self._unstructure_attrs = self.unstructure_attrs_astuple
-            self._structure_attrs = self.structure_attrs_fromtuple
+            self._unstructure_dataclass = self.unstructure_dataclass_astuple
+            self._structure_dataclass = self.structure_dataclass_fromtuple
 
         self._dis_func_cache = lru_cache()(self._get_dis_func)
 
@@ -94,11 +91,11 @@ class Converter(object):
                 (_subclass(Set), self._unstructure_seq),
                 (_subclass(FrozenSet), self._unstructure_seq),
                 (_subclass(Enum), self._unstructure_enum),
-                (_is_attrs_class, self._unstructure_attrs),
+                (is_dataclass, self._unstructure_dataclass),
             ]
         )
 
-        # Per-instance register of to-attrs converters.
+        # Per-instance register of to-dataclasses converters.
         # Singledispatch dispatches based on the first argument, so we
         # store the function and switch the arguments in self.loads.
         self._structure_func = MultiStrategyDispatch(self._structure_default)
@@ -110,7 +107,7 @@ class Converter(object):
                 (is_tuple, self._structure_tuple),
                 (is_mapping, self._structure_dict),
                 (is_union_type, self._structure_union),
-                (_is_attrs_class, self._structure_attrs),
+                (is_dataclass, self._structure_dataclass),
             ]
         )
         # Strings are sequences.
@@ -141,10 +138,10 @@ class Converter(object):
     @property
     def unstruct_strat(self):
         # type: () -> UnstructureStrategy
-        """The default way of unstructuring ``attrs`` classes."""
+        """The default way of unstructuring ``dataclasses``."""
         return (
             UnstructureStrategy.AS_DICT
-            if self._unstructure_attrs == self.unstructure_attrs_asdict
+            if self._unstructure_dataclass == self.unstructure_dataclass_asdict
             else UnstructureStrategy.AS_TUPLE
         )
 
@@ -192,23 +189,22 @@ class Converter(object):
         return self._structure_func.dispatch(cl)(obj, cl)
 
     # Classes to Python primitives.
-    def unstructure_attrs_asdict(self, obj):
+    def unstructure_dataclass_asdict(self, obj):
         # type: (Any) -> Dict[str, Any]
-        """Our version of `attrs.asdict`, so we can call back to us."""
-        attrs = obj.__class__.__attrs_attrs__
+        """Our version of `dataclasses.asdict`, so we can call back to us."""
+        fields = obj.__class__.__dataclass_fields__
         dispatch = self._unstructure_func.dispatch
         rv = self._dict_factory()
-        for a in attrs:
-            name = a.name
-            v = getattr(obj, name)
-            rv[name] = dispatch(v.__class__)(v)
+        for f in fields:
+            v = getattr(obj, f)
+            rv[f] = dispatch(v.__class__)(v)
         return rv
 
-    def unstructure_attrs_astuple(self, obj):
+    def unstructure_dataclass_astuple(self, obj):
         # type: (Any) -> Tuple
-        """Our version of `attrs.astuple`, so we can call back to us."""
-        attrs = obj.__class__.__attrs_attrs__
-        return tuple(self.unstructure(getattr(obj, a.name)) for a in attrs)
+        """Our version of `dataclasses.astuple`, so we can call back to us."""
+        fields = obj.__class__.__dataclass_fields__
+        return tuple(self.unstructure(getattr(obj, f)) for f in fields)
 
     def _unstructure_enum(self, obj):
         """Convert an enum to its value."""
@@ -240,7 +236,7 @@ class Converter(object):
     def _structure_default(self, obj, cl):
         """This is the fallthrough case. Everything is a subclass of `Any`.
 
-        A special condition here handles ``attrs`` classes.
+        A special condition here handles ``dataclasses``.
 
         Bare optionals end here too (optionals with arguments are unions.) We
         treat bare optionals as Any.
@@ -270,34 +266,36 @@ class Converter(object):
         else:
             return obj
 
-    # Attrs classes.
+    # Dataclasses.
 
-    def structure_attrs_fromtuple(self, obj, cl):
+    def structure_dataclass_fromtuple(self, obj, cl):
         # type: (Tuple, Type[T]) -> T
-        """Load an attrs class from a sequence (tuple)."""
+        """Load an dataclass from a sequence (tuple)."""
         conv_obj = []  # A list of converter parameters.
-        for a, value in zip(cl.__attrs_attrs__, obj):  # type: ignore
+        for a, value in zip(
+            tuple(v for _, v in cl.__dataclass_fields__.items()), obj
+        ):
             # We detect the type by the metadata.
-            converted = self._structure_attr_from_tuple(a, a.name, value)
+            converted = self._structure_dataclass_from_tuple(a, a.name, value)
             conv_obj.append(converted)
 
         return cl(*conv_obj)  # type: ignore
 
-    def _structure_attr_from_tuple(self, a, name, value):
-        """Handle an individual attrs attribute."""
+    def _structure_dataclass_from_tuple(self, a, name, value):
+        """Handle an individual dataclass attribute."""
         type_ = a.type
         if type_ is None:
             # No type metadata.
             return value
         return self._structure_func.dispatch(type_)(value, type_)
 
-    def structure_attrs_fromdict(self, obj, cl):
+    def structure_dataclass_fromdict(self, obj, cl):
         # type: (Mapping[str, Any], Type[T]) -> T
-        """Instantiate an attrs class from a mapping (dict)."""
+        """Instantiate an dataclass from a mapping (dict)."""
         # For public use.
         conv_obj = {}  # Start with a fresh dict, to ignore extra keys.
         dispatch = self._structure_func.dispatch
-        for a in cl.__attrs_attrs__:  # type: ignore
+        for _, a in cl.__dataclass_fields__.items():  # type: ignore
             # We detect the type by metadata.
             type_ = a.type
             name = a.name
@@ -306,9 +304,6 @@ class Converter(object):
                 val = obj[name]
             except KeyError:
                 continue
-
-            if name[0] == "_":
-                name = name[1:]
 
             conv_obj[name] = (
                 dispatch(type_)(val, type_) if type_ is not None else val
@@ -421,15 +416,15 @@ class Converter(object):
         """Fetch or try creating a disambiguation function for a union."""
         union_types = union.__args__
         if NoneType in union_types:  # type: ignore
-            # We support unions of attrs classes and NoneType higher in the
+            # We support unions of dataclasses and NoneType higher in the
             # logic.
             union_types = tuple(
                 e for e in union_types if e is not NoneType  # type: ignore
             )
 
-        if not all(hasattr(e, "__attrs_attrs__") for e in union_types):
+        if not all(is_dataclass(e) for e in union_types):
             raise ValueError(
-                "Only unions of attr classes supported "
+                "Only unions of dataclasses supported "
                 "currently. Register a loads hook manually."
             )
         return create_uniq_field_dis_func(*union_types)

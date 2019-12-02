@@ -1,9 +1,10 @@
-import attr
+from dataclasses import dataclass
+
 from .function_dispatch import FunctionDispatch
 from ._compat import singledispatch, lru_cache
 
 
-@attr.s
+@dataclass
 class _DispatchNotFound(object):
     """ a dummy object to help signify a dispatch not found """
 

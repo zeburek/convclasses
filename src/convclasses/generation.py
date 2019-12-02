@@ -1,16 +1,16 @@
 from typing import Any, Callable, Dict, Sequence, Type, TypeVar
 
-import attr
+import dataclasses
 
 from ._compat import is_sequence
-from cattr.converters import Converter
+from convclasses.converters import Converter
 
 T = TypeVar("T")
 
 
-@attr.s(slots=True)
+@dataclasses.dataclass()
 class AttributeOverride(object):
-    omit_if_default = attr.ib(default=False, type=bool)
+    omit_if_default: bool = dataclasses.field(default=False)
 
 
 def override(omit_if_default=False):
@@ -29,119 +29,113 @@ def make_dict_unstructure_fn(cl, converter, **kwargs):
     lines = []
     post_lines = []
 
-    attrs = cl.__attrs_attrs__  # type: ignore
+    fields = cl.__dataclass_fields__  # type: ignore
 
     lines.append("def {}(i):".format(fn_name))
     lines.append("    res = {")
-    for a in attrs:
-        attr_name = a.name
-        override = kwargs.pop(attr_name, _neutral)
-        d = a.default
-        if a.type is None:
+    for field_name, f in fields.items():
+        override = kwargs.pop(field_name, _neutral)
+        default = f.default
+        default_factory = f.default_factory
+        if f.type is None:
             # No type annotation, doing runtime dispatch.
-            if d is not attr.NOTHING and override.omit_if_default:
-                def_name = "__cattr_def_{}".format(attr_name)
+            if (
+                (default is not dataclasses.MISSING)
+                or (default_factory is not dataclasses.MISSING)
+            ) and override.omit_if_default:
+                def_name = "__cattr_def_{}".format(field_name)
 
-                if isinstance(d, attr.Factory):
-                    globs[def_name] = d.factory
-                    if d.takes_self:
-                        post_lines.append(
-                            "    if i.{name} != {def_name}(i):".format(
-                                name=attr_name, def_name=def_name
-                            )
+                if default_factory != dataclasses.MISSING:
+                    globs[def_name] = default_factory
+                    post_lines.append(
+                        "    if i.{name} != {def_name}(i):".format(
+                            name=field_name, def_name=def_name
                         )
-                    else:
-                        post_lines.append(
-                            "    if i.{name} != {def_name}():".format(
-                                name=attr_name, def_name=def_name
-                            )
-                        )
+                    )
                     post_lines.append(
                         "        res['{name}'] = i.{name}".format(
-                            name=attr_name
+                            name=field_name
                         )
                     )
                 else:
-                    globs[def_name] = d
+                    globs[def_name] = default
                     post_lines.append(
                         "    if i.{name} != {def_name}:".format(
-                            name=attr_name, def_name=def_name
+                            name=field_name, def_name=def_name
                         )
                     )
                     post_lines.append(
                         "        res['{name}'] = __c_u(i.{name})".format(
-                            name=attr_name
+                            name=field_name
                         )
                     )
 
             else:
                 # No default or no override.
                 lines.append(
-                    "        '{name}': __c_u(i.{name}),".format(name=attr_name)
+                    "        '{name}': __c_u(i.{name}),".format(
+                        name=field_name
+                    )
                 )
         else:
             # Do the dispatch here and now.
-            type = a.type
+            type = f.type
             if is_sequence(type):
                 type = Sequence
             conv_function = converter._unstructure_func.dispatch(type)
-            if d is not attr.NOTHING and override.omit_if_default:
-                def_name = "__cattr_def_{}".format(attr_name)
+            if (
+                (default is not dataclasses.MISSING)
+                or (default_factory is not dataclasses.MISSING)
+            ) and override.omit_if_default:
+                def_name = "__cattr_def_{}".format(field_name)
 
-                if isinstance(d, attr.Factory):
+                if default_factory != dataclasses.MISSING:
                     # The default is computed every time.
-                    globs[def_name] = d.factory
-                    if d.takes_self:
-                        post_lines.append(
-                            "    if i.{name} != {def_name}(i):".format(
-                                name=attr_name, def_name=def_name
-                            )
+                    globs[def_name] = default_factory
+                    post_lines.append(
+                        "    if i.{name} != {def_name}(i):".format(
+                            name=field_name, def_name=def_name
                         )
-                    else:
-                        post_lines.append(
-                            "    if i.{name} != {def_name}():".format(
-                                name=attr_name, def_name=def_name
-                            )
-                        )
+                    )
                     if conv_function == converter._unstructure_identity:
                         # Special case this, avoid a function call.
                         post_lines.append(
                             "        res['{name}'] = i.{name}".format(
-                                name=attr_name
+                                name=field_name
                             )
                         )
                     else:
                         unstruct_fn_name = "__cattr_unstruct_{}".format(
-                            attr_name
+                            field_name
                         )
                         globs[unstruct_fn_name] = conv_function
                         post_lines.append(
                             "        res['{name}'] = {fn}(i.{name}),".format(
-                                name=attr_name, fn=unstruct_fn_name
+                                name=field_name, fn=unstruct_fn_name
                             )
                         )
                 else:
                     # Default is not a factory, but a constant.
-                    globs[def_name] = d
+                    globs[def_name] = default
                     post_lines.append(
                         "    if i.{name} != {def_name}:".format(
-                            name=attr_name, def_name=def_name
+                            name=field_name, def_name=def_name
                         )
                     )
                     if conv_function == converter._unstructure_identity:
                         post_lines.append(
                             "        res['{name}'] = i.{name}".format(
-                                name=attr_name
+                                name=field_name
                             )
                         )
                     else:
                         unstruct_fn_name = "__cattr_unstruct_{}".format(
-                            attr_name
+                            field_name
                         )
                         globs[unstruct_fn_name] = conv_function
                         post_lines.append(
                             "        res['{name}'] = {fn}(i.{name})".format(
-                                name=attr_name, fn=unstruct_fn_name
+                                name=field_name, fn=unstruct_fn_name
                             )
                         )
             else:
@@ -149,14 +143,14 @@ def make_dict_unstructure_fn(cl, converter, **kwargs):
                 if conv_function == converter._unstructure_identity:
                     # Special case this, avoid a function call.
                     lines.append(
-                        "    '{name}': i.{name},".format(name=attr_name)
+                        "    '{name}': i.{name},".format(name=field_name)
                     )
                 else:
-                    unstruct_fn_name = "__cattr_unstruct_{}".format(attr_name)
+                    unstruct_fn_name = "__cattr_unstruct_{}".format(field_name)
                     globs[unstruct_fn_name] = conv_function
                     lines.append(
                         "    '{name}': {fn}(i.{name}),".format(
-                            name=attr_name, fn=unstruct_fn_name
+                            name=field_name, fn=unstruct_fn_name
                         )
                     )
     lines.append("    }")

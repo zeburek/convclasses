@@ -1,12 +1,11 @@
 """Test both structuring and unstructuring."""
-import attr
 import pytest
 
-from attr import fields, make_class
+from dataclasses import fields, make_dataclass, dataclass
 from hypothesis import assume, given
 from hypothesis.strategies import sampled_from
 
-from cattr import Converter, UnstructureStrategy
+from convclasses import Converter, UnstructureStrategy
 from typing import Union, Optional
 
 from . import simple_typed_classes, nested_typed_classes, simple_typed_attrs
@@ -31,7 +30,7 @@ def test_simple_roundtrip_defaults(cls_and_vals, strat):
     Simple classes with metadata can be unstructured and restructured.
     """
     a, _ = cls_and_vals
-    cl = make_class("HypClass", {"a": a})
+    cl = make_dataclass("HypClass", [("a", a.type, a)])
     converter = Converter(unstruct_strat=strat)
     inst = cl()
     assert converter.unstructure(
@@ -72,9 +71,9 @@ def test_union_field_roundtrip(cl_and_vals_a, cl_and_vals_b, strat):
     common_names = a_field_names & b_field_names
     assume(len(a_field_names) > len(common_names))
 
-    @attr.s
+    @dataclass
     class C(object):
-        a = attr.ib(type=Union[cl_a, cl_b])
+        a: Union[cl_a, cl_b]
 
     inst = C(a=cl_a(*vals_a))
 
@@ -100,9 +99,9 @@ def test_optional_field_roundtrip(converter, cl_and_vals):
     """
     cl, vals = cl_and_vals
 
-    @attr.s
+    @dataclass
     class C(object):
-        a = attr.ib(type=Optional[cl])
+        a: Optional[cl]
 
     inst = C(a=cl(*vals))
     assert inst == converter.structure(converter.unstructure(inst), C)

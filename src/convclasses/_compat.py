@@ -14,18 +14,10 @@ is_py2 = version_info[0] == 2
 is_py3 = version_info[0] == 3
 is_py37 = version_info[:2] == (3, 7)
 is_py38 = version_info[:2] == (3, 8)
+from functools import lru_cache, singledispatch  # noqa
 
-if is_py2:
-    from functools32 import lru_cache
-    from singledispatch import singledispatch
-
-    unicode = unicode  # noqa
-    bytes = str
-else:
-    from functools import lru_cache, singledispatch  # noqa
-
-    unicode = str
-    bytes = bytes
+unicode = str
+bytes = bytes
 
 if is_py37 or is_py38:
     from typing import List, Union, _GenericAlias
@@ -97,11 +89,7 @@ else:
         return issubclass(type, MutableSet)
 
     def is_sequence(type):
-        if is_py2:
-            is_string = issubclass(type, basestring)  # noqa:F821
-        else:
-            is_string = issubclass(type, str)
-        return issubclass(type, Sequence) and not is_string
+        return issubclass(type, Sequence) and not issubclass(type, str)
 
     def is_tuple(type):
         return issubclass(type, Tuple)

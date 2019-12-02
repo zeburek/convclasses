@@ -5,21 +5,21 @@ __all__ = (
     "global_converter",
     "unstructure",
     "structure",
-    "structure_attrs_fromtuple",
-    "structure_attrs_fromdict",
+    "structure_dataclass_fromtuple",
+    "structure_dataclass_fromdict",
     "UnstructureStrategy",
 )
 
-__author__ = "Tin Tvrtković"
-__email__ = "tinchester@gmail.com"
+__author__ = "Parviz Khavari"
+__email__ = "me@parviz.pw"
 
 
 global_converter = Converter()
 
 unstructure = global_converter.unstructure
 structure = global_converter.structure
-structure_attrs_fromtuple = global_converter.structure_attrs_fromtuple
-structure_attrs_fromdict = global_converter.structure_attrs_fromdict
+structure_dataclass_fromtuple = global_converter.structure_dataclass_fromtuple
+structure_dataclass_fromdict = global_converter.structure_dataclass_fromdict
 register_structure_hook = global_converter.register_structure_hook
 register_structure_hook_func = global_converter.register_structure_hook_func
 register_unstructure_hook = global_converter.register_unstructure_hook

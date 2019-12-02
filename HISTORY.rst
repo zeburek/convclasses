@@ -4,10 +4,13 @@ History
 
 1.0.0 (UNRELEASED)
 ------------------
-* ``attrs`` classes with private attributes can now be structured by default.
-* Structuring from dictionaries is now more lenient: extra keys are ignored.
-* ``cattrs`` has improved type annotations for use with Mypy.
-* Unstructuring sets and frozensets now works properly.
+* Rename ``cattrs`` into ``conclasses``
+* Move convclasses from ``attrs`` usage onto ``dataclasses``
+* Fix incorrect structuring/unstructuring of private fields
+* Change ``pendulum`` in docs onto ``arrow``
+
+cattrs history
+==============
 
 0.9.1 (2019-10-26)
 ------------------

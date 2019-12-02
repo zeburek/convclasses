@@ -1,6 +1,6 @@
 """Tests for generated dict functions."""
-from attr._make import NOTHING
-from cattr.generation import make_dict_unstructure_fn, override
+from dataclasses import MISSING
+from convclasses.generation import make_dict_unstructure_fn, override
 from hypothesis import assume, given
 
 from . import simple_classes, nested_classes
@@ -27,8 +27,10 @@ def test_nodefs_generated_unstructuring(converter, cl_and_vals):
     cl, vals = cl_and_vals
 
     attr_is_default = False
-    for attr, val in zip(cl.__attrs_attrs__, vals):
-        if attr.default is not NOTHING:
+    for attr, val in zip(
+        tuple(v for _, v in cl.__dataclass_fields__.items()), vals
+    ):
+        if attr.default is not MISSING:
             fn = make_dict_unstructure_fn(
                 cl, converter, **{attr.name: override(omit_if_default=True)}
             )

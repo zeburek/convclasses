@@ -12,8 +12,8 @@ from typing import (
     Union,
 )
 
-from cattr.converters import NoneType
-from cattr._compat import bytes, unicode, is_py2, is_bare, is_union_type
+from convclasses.converters import NoneType
+from convclasses._compat import bytes, unicode, is_py2, is_bare, is_union_type
 
 from pytest import raises
 
@@ -34,7 +34,7 @@ from hypothesis.strategies import (
     data,
 )
 
-from cattr import Converter
+from convclasses import Converter
 
 from . import (
     primitive_strategies,
