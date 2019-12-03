@@ -2,17 +2,23 @@
 convclasses
 ===========
 
-.. image:: https://github.com/zeburek/convclasses/workflows/Test%20package/badge.svg
+.. image:: https://img.shields.io/github/workflow/status/zeburek/convclasses/Test%20package/master
     :target: https://github.com/zeburek/convclasses/actions
 
 .. image:: https://badge.fury.io/py/convclasses.svg
     :target: https://badge.fury.io/py/convclasses
 
-.. image:: https://pepy.tech/badge/convclasses
-    :target: https://pepy.tech/project/convclasses
+.. image:: https://img.shields.io/pypi/dm/convclasses.svg
+    :target: https://pypi.python.org/pypi/convclasses/
 
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/ambv/black
+.. image:: https://img.shields.io/pypi/l/convclasses.svg
+    :target: https://pypi.python.org/pypi/convclasses/
+
+.. image:: https://img.shields.io/pypi/pyversions/convclasses.svg
+    :target: https://pypi.python.org/pypi/convclasses/
+
+.. image:: https://readthedocs.org/projects/convclasses/badge/?version=stable
+    :target: https://convclasses.readthedocs.io/en/stable/
 
 
 ----
@@ -56,12 +62,12 @@ gets converted into a tuple of three ints.
 .. code-block:: python
 
     >>> import convclasses
-    ... from dataclasses import dataclass
-    >>>
-    >>> @dataclass(slots=True, frozen=True)  # It works with normal classes too.
+    >>> from dataclasses import dataclass
+    >>> from typing import Any
+    >>> @dataclass(frozen=True)  # It works with normal classes too.
     ... class C:
-    ...     a = attr.ib()
-    ...     b = attr.ib()
+    ...     a: Any
+    ...     b: Any
     ...
     >>> instance = C(1, 'a')
     >>> convclasses.unstructure(instance)
@@ -95,7 +101,7 @@ metadata.
     ...     chip_id: Any
     ...     time_chipped: float
     ...
-    >>> @attr.s
+    >>> @dataclass
     ... class Dog:
     ...     cuteness: int
     ...     chip: Optional[DogMicrochip]
@@ -173,4 +179,3 @@ characteristic_.
 .. _perf: https://github.com/haypo/perf
 .. _cattrs: https://github.com/Tinche/cattrs
 .. _Tinche: https://github.com/Tinche
-

@@ -30,6 +30,7 @@ setup(
     version="1.0.0",
     description="Complex custom class converters for dataclasses",
     long_description=readme + "\n\n" + history,
+    long_description_content_type="text/x-rst",
     author="Parviz Khavari",
     author_email="me@parviz.pw",
     url="https://github.com/zeburek/convclasses",
