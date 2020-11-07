@@ -1,11 +1,7 @@
 import dataclasses
-from typing import Any, Callable, Dict, Sequence, Type, TypeVar
-
-from convclasses.converters import Converter
+from typing import Sequence
 
 from ._compat import is_sequence
-
-T = TypeVar("T")
 
 
 @dataclasses.dataclass()
@@ -20,8 +16,7 @@ def override(omit_if_default=False):
 _neutral = AttributeOverride()
 
 
-def make_dict_unstructure_fn(cl, converter, **kwargs):
-    # type: (Type[T], Converter, **AttributeOverride) -> Callable[[T], Dict[str, Any]]  # noqa:E501
+def make_dict_unstructure_fn(cl, converter, omit_if_default=False, **kwargs):
     """Generate a specialized dict unstructuring function for a class."""
     cl_name = cl.__name__
     fn_name = "unstructure_" + cl_name
@@ -42,7 +37,7 @@ def make_dict_unstructure_fn(cl, converter, **kwargs):
             if (
                 (default is not dataclasses.MISSING)
                 or (default_factory is not dataclasses.MISSING)
-            ) and override.omit_if_default:
+            ) and (omit_if_default or override.omit_if_default):
                 def_name = "__cattr_def_{}".format(field_name)
 
                 if default_factory != dataclasses.MISSING:
@@ -86,7 +81,7 @@ def make_dict_unstructure_fn(cl, converter, **kwargs):
             if (
                 (default is not dataclasses.MISSING)
                 or (default_factory is not dataclasses.MISSING)
-            ) and override.omit_if_default:
+            ) and (omit_if_default or override.omit_if_default):
                 def_name = "__cattr_def_{}".format(field_name)
 
                 if default_factory != dataclasses.MISSING:

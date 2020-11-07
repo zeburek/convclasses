@@ -3,7 +3,7 @@ from dataclasses import MISSING
 
 from hypothesis import assume, given
 
-from convclasses.generation import make_dict_unstructure_fn, override
+from convclasses.gen import make_dict_unstructure_fn, override
 
 from . import nested_classes, simple_classes
 
@@ -26,6 +26,7 @@ def test_unmodified_generated_unstructuring(converter, cl_and_vals):
 
 @given(nested_classes | simple_classes())
 def test_nodefs_generated_unstructuring(converter, cl_and_vals):
+    """Test omitting default values on a per-attribute basis."""
     cl, vals = cl_and_vals
 
     attr_is_default = False
@@ -50,3 +51,35 @@ def test_nodefs_generated_unstructuring(converter, cl_and_vals):
 
     if attr_is_default:
         assert attr.name not in res
+
+
+@given(nested_classes | simple_classes())
+def test_nodefs_generated_unstructuring_cl(converter, cl_and_vals):
+    """Test omitting default values on a per-class basis."""
+    cl, vals = cl_and_vals
+
+    for attr, val in zip(cl.__attrs_attrs__, vals):
+        if attr.default is not MISSING:
+            break
+    else:
+        assume(False)
+
+    converter.register_unstructure_hook(
+        cl, make_dict_unstructure_fn(cl, converter, omit_if_default=True)
+    )
+
+    inst = cl(*vals)
+
+    res = converter.unstructure(inst)
+
+    for attr, val in zip(cl.__attrs_attrs__, vals):
+        if attr.default is not MISSING:
+            if val == attr.default:
+                assert attr.name not in res
+            else:
+                assert attr.name in res
+        elif attr.default_factory is not MISSING:
+            if val == attr.default_factory():
+                assert attr.name not in res
+            else:
+                assert attr.name in res
