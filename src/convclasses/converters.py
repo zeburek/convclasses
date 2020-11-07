@@ -1,5 +1,5 @@
-from enum import Enum
 from dataclasses import is_dataclass
+from enum import Enum
 from typing import (  # noqa: F401, imported for Mypy.
     Any,
     Callable,
@@ -13,6 +13,7 @@ from typing import (  # noqa: F401, imported for Mypy.
     Type,
     TypeVar,
 )
+
 from ._compat import (
     bytes,
     is_bare,
@@ -27,7 +28,6 @@ from ._compat import (
 )
 from .disambiguators import create_uniq_field_dis_func
 from .multistrategy_dispatch import MultiStrategyDispatch
-
 
 NoneType = type(None)
 T = TypeVar("T")

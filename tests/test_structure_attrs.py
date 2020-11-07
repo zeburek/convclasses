@@ -1,11 +1,12 @@
 """Loading of attrs classes."""
+import typing
+from dataclasses import MISSING, asdict, astuple, fields
 from typing import Any, Union
 
-import typing
-from dataclasses import asdict, astuple, fields, MISSING
 from hypothesis import assume, given
-from convclasses.converters import Converter
 from hypothesis.strategies import data, lists, sampled_from
+
+from convclasses.converters import Converter
 
 from . import simple_classes
 

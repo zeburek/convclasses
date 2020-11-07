@@ -1,7 +1,8 @@
-import string
 import keyword
 import os
-
+import string
+import typing
+from dataclasses import MISSING, field, make_dataclass
 from enum import Enum
 from typing import (
     Any,
@@ -16,12 +17,10 @@ from typing import (
     Tuple,
 )
 
-import typing
+from hypothesis import HealthCheck, settings
+from hypothesis import strategies as st
 
 from convclasses._compat import bytes, unicode
-
-from dataclasses import make_dataclass, MISSING, field
-from hypothesis import strategies as st, settings, HealthCheck
 
 settings.register_profile(
     "CI", settings(suppress_health_check=[HealthCheck.too_slow]), deadline=None

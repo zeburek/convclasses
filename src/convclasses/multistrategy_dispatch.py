@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
+from ._compat import lru_cache, singledispatch
 from .function_dispatch import FunctionDispatch
-from ._compat import singledispatch, lru_cache
 
 
 @dataclass

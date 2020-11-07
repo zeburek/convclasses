@@ -1,6 +1,5 @@
 import pytest
-
-from hypothesis import HealthCheck, settings, Verbosity
+from hypothesis import HealthCheck, Verbosity, settings
 
 from convclasses import Converter
 

@@ -4,8 +4,8 @@ from typing import (
     Dict,
     FrozenSet,
     Mapping,
-    MutableSet,
     MutableSequence,
+    MutableSet,
     Sequence,
     Tuple,
 )

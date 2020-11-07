@@ -1,9 +1,11 @@
 """Tests for generated dict functions."""
 from dataclasses import MISSING
-from convclasses.generation import make_dict_unstructure_fn, override
+
 from hypothesis import assume, given
 
-from . import simple_classes, nested_classes
+from convclasses.generation import make_dict_unstructure_fn, override
+
+from . import nested_classes, simple_classes
 
 
 @given(nested_classes | simple_classes())

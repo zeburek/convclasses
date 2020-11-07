@@ -1,4 +1,8 @@
 """Tests for metadata functionality."""
+import dataclasses
+from dataclasses import MISSING
+from typing import Any, Dict, List
+
 from hypothesis.strategies import (
     booleans,
     composite,
@@ -11,9 +15,7 @@ from hypothesis.strategies import (
     text,
     tuples,
 )
-from typing import Any, Dict, List
-import dataclasses
-from dataclasses import MISSING
+
 from convclasses._compat import unicode
 
 from .. import gen_attr_names, make_dataclass

@@ -1,8 +1,8 @@
 """Utilities for union (sum type) disambiguation."""
 from collections import OrderedDict
+from dataclasses import fields
 from functools import reduce
 from operator import or_
-
 from typing import (  # noqa: F401, imported for Mypy.
     Callable,
     Dict,
@@ -10,8 +10,6 @@ from typing import (  # noqa: F401, imported for Mypy.
     Optional,
     Type,
 )
-
-from dataclasses import fields
 
 
 def create_uniq_field_dis_func(*classes):

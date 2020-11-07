@@ -1,12 +1,11 @@
 """Tests for dumping."""
+from dataclasses import asdict, astuple
 from typing import Any, Type
 
-from dataclasses import asdict, astuple
-from convclasses.converters import Converter, UnstructureStrategy
-
 from hypothesis import given
-from hypothesis.strategies import sampled_from, data
+from hypothesis.strategies import data, sampled_from
 
+from convclasses.converters import Converter, UnstructureStrategy
 
 from . import (
     dicts_of_primitives,
@@ -16,7 +15,6 @@ from . import (
     sets_of_primitives,
     simple_classes,
 )
-
 
 unstruct_strats = sampled_from(
     [UnstructureStrategy.AS_DICT, UnstructureStrategy.AS_TUPLE]

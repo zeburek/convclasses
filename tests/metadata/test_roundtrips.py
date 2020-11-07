@@ -1,14 +1,14 @@
 """Test both structuring and unstructuring."""
-import pytest
+from dataclasses import dataclass, fields, make_dataclass
+from typing import Optional, Union
 
-from dataclasses import fields, make_dataclass, dataclass
+import pytest
 from hypothesis import assume, given
 from hypothesis.strategies import sampled_from
 
 from convclasses import Converter, UnstructureStrategy
-from typing import Union, Optional
 
-from . import simple_typed_classes, nested_typed_classes, simple_typed_attrs
+from . import nested_typed_classes, simple_typed_attrs, simple_typed_classes
 
 unstructure_strats = sampled_from(list(UnstructureStrategy))
 

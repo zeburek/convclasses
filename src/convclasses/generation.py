@@ -1,9 +1,9 @@
+import dataclasses
 from typing import Any, Callable, Dict, Sequence, Type, TypeVar
 
-import dataclasses
+from convclasses.converters import Converter
 
 from ._compat import is_sequence
-from convclasses.converters import Converter
 
 T = TypeVar("T")
 

@@ -1,7 +1,7 @@
 """Tests for auto-disambiguators."""
-import pytest
-from dataclasses import dataclass, fields, asdict
+from dataclasses import asdict, dataclass, fields
 
+import pytest
 from hypothesis import assume, given
 
 from convclasses.disambiguators import create_uniq_field_dis_func

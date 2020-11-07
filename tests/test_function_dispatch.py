@@ -1,4 +1,5 @@
 import pytest
+
 from convclasses.function_dispatch import FunctionDispatch
 
 
