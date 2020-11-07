@@ -345,6 +345,20 @@ def dict_attrs(draw, defaults=None):
     return _get_field(default_factory=default), val_strat
 
 
+@st.composite
+def optional_attrs(draw, defaults=None):
+    """
+    Generate a tuple of an attribute and a strategy that yields values
+    for that attribute. The strategy generates optional integers.
+    """
+    default = MISSING
+    val_strat = st.integers() | st.none()
+    if defaults is True or (defaults is None and draw(st.booleans())):
+        default = draw(val_strat)
+
+    return (field(default=default), val_strat)
+
+
 def simple_attrs(defaults=None):
     return (
         bare_attrs(defaults)
@@ -352,6 +366,7 @@ def simple_attrs(defaults=None):
         | str_attrs(defaults)
         | float_attrs(defaults)
         | dict_attrs(defaults)
+        | optional_attrs(defaults)
     )
 
 

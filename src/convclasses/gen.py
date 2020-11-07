@@ -1,15 +1,15 @@
 import dataclasses
-from typing import Sequence
+from typing import Optional, Sequence
 
 from ._compat import is_sequence
 
 
-@dataclasses.dataclass()
-class AttributeOverride(object):
-    omit_if_default: bool = dataclasses.field(default=False)
+@dataclasses.dataclass(frozen=True)
+class AttributeOverride:
+    omit_if_default: Optional[bool] = dataclasses.field(default=None)
 
 
-def override(omit_if_default=False):
+def override(omit_if_default=None):
     return AttributeOverride(omit_if_default=omit_if_default)
 
 
@@ -37,7 +37,10 @@ def make_dict_unstructure_fn(cl, converter, omit_if_default=False, **kwargs):
             if (
                 (default is not dataclasses.MISSING)
                 or (default_factory is not dataclasses.MISSING)
-            ) and (omit_if_default or override.omit_if_default):
+            ) and (
+                (omit_if_default and override.omit_if_default is not False)
+                or override.omit_if_default
+            ):
                 def_name = "__cattr_def_{}".format(field_name)
 
                 if default_factory != dataclasses.MISSING:
@@ -81,7 +84,10 @@ def make_dict_unstructure_fn(cl, converter, omit_if_default=False, **kwargs):
             if (
                 (default is not dataclasses.MISSING)
                 or (default_factory is not dataclasses.MISSING)
-            ) and (omit_if_default or override.omit_if_default):
+            ) and (
+                (omit_if_default and override.omit_if_default is not False)
+                or override.omit_if_default
+            ):
                 def_name = "__cattr_def_{}".format(field_name)
 
                 if default_factory != dataclasses.MISSING:
