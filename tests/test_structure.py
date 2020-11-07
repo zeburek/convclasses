@@ -353,7 +353,7 @@ def test_structuring_unsupported(converter):
 
 
 def test_subclass_registration_is_honored(converter):
-    """ If a subclass is registered after a superclass,
+    """If a subclass is registered after a superclass,
     that subclass handler should be dispatched for
     structure
     """

@@ -251,7 +251,7 @@ man_pages = [
         "convclasses",
         u"convclasses Documentation",
         [u"Parviz Khavari"],
-        1
+        1,
     )
 ]
 

@@ -45,8 +45,8 @@ class MultiStrategyDispatch(object):
         self.dispatch.cache_clear()
 
     def register_func_list(self, func_and_handler):
-        """ register a function to determine if the handle
-            should be used for the type
+        """register a function to determine if the handle
+        should be used for the type
         """
         for func, handler in func_and_handler:
             self._function_dispatch.register(func, handler)
