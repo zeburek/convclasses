@@ -14,9 +14,6 @@ version_info = sys.version_info[0:3]
 is_py37 = version_info[:2] == (3, 7)
 is_py38 = version_info[:2] == (3, 8)
 
-unicode = str
-bytes = bytes
-
 if is_py37 or is_py38:
     from typing import List, Union, _GenericAlias
 

@@ -20,8 +20,6 @@ from typing import (
 from hypothesis import HealthCheck, settings
 from hypothesis import strategies as st
 
-from convclasses._compat import bytes, unicode
-
 settings.register_profile(
     "CI", settings(suppress_health_check=[HealthCheck.too_slow]), deadline=None
 )
@@ -34,7 +32,7 @@ primitive_strategies = st.sampled_from(
     [
         (st.integers(), int),
         (st.floats(allow_nan=False), float),
-        (st.text(), unicode),
+        (st.text(), str),
         (st.binary(), bytes),
     ]
 )
@@ -169,7 +167,7 @@ def gen_attr_names():
             yield outer + inner
 
 
-def _create_hyp_class(attrs_and_strategy):
+def _create_hyp_class(attrs_and_strategy, frozen=None):
     """
     A helper function for Hypothesis to generate attrs classes.
 
@@ -181,11 +179,13 @@ def _create_hyp_class(attrs_and_strategy):
     attrs = [a[0] for a in attrs_and_strat]
     vals = tuple((a[1]) for a in attrs_and_strat)
     return st.tuples(
-        st.just(
-            make_dataclass(
+        st.builds(
+            lambda f: make_dataclass(
                 "HypClass",
                 zip(gen_attr_names(), [a.type for a in attrs], attrs),
-            )
+                frozen=f,
+            ),
+            st.booleans() if frozen is None else st.just(frozen),
         ),
         st.tuples(*vals),
     )
@@ -208,6 +208,27 @@ def just_class_with_type(tup):
             _get_field(default_factory=nested_cl, _type=nested_cl),
             st.just(nested_cl()),
         )
+    )
+    return _create_hyp_class(combined_attrs)
+
+
+def just_class_with_type_takes_self(tup):
+    nested_cl = tup[1][0]
+    combined_attrs = list(tup[0])
+    combined_attrs.append(
+        (
+            _get_field(default_factory=lambda _: nested_cl(), type=nested_cl),
+            st.just(nested_cl()),
+        )
+    )
+    return _create_hyp_class(combined_attrs)
+
+
+def just_frozen_class_with_type(tup):
+    nested_cl = tup[1][0]
+    combined_attrs = list(tup[0])
+    combined_attrs.append(
+        (_get_field(default=nested_cl(), type=nested_cl), st.just(nested_cl()))
     )
     return _create_hyp_class(combined_attrs)
 
@@ -272,6 +293,8 @@ def _create_hyp_nested_strategy(simple_class_strategy):
         | attrs_and_classes.flatmap(list_of_class)
         | attrs_and_classes.flatmap(list_of_class_with_type)
         | attrs_and_classes.flatmap(dict_of_class)
+        | attrs_and_classes.flatmap(just_frozen_class_with_type)
+        | attrs_and_classes.flatmap(just_class_with_type_takes_self)
     )
 
 
@@ -309,7 +332,7 @@ def str_attrs(draw, defaults=None, type_annotations=None):
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = draw(st.text())
     if (type_annotations is None and draw(st.booleans())) or type_annotations:
-        type = unicode
+        type = str
     else:
         type = None
     return _get_field(default=default, _type=type), st.text()
@@ -324,7 +347,7 @@ def float_attrs(draw, defaults=None):
     default = MISSING
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = draw(st.floats())
-    return _get_field(default=default), st.floats()
+    return _get_field(default=default), st.floats(allow_nan=False)
 
 
 @st.composite
@@ -377,13 +400,15 @@ def lists_of_attrs(defaults=None, min_size=0):
     ).map(lambda l: sorted(l, key=fields_sorting))
 
 
-def simple_classes(defaults=None, min_attrs=0):
+def simple_classes(defaults=None, min_attrs=0, frozen=None):
     """
     Return a strategy that yields tuples of simple classes and values to
     instantiate them.
     """
     return lists_of_attrs(defaults, min_size=min_attrs).flatmap(
-        _create_hyp_class
+        lambda attrs_and_strategy: _create_hyp_class(
+            attrs_and_strategy, frozen=frozen
+        )
     )
 
 

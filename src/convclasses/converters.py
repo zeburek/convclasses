@@ -15,7 +15,6 @@ from typing import (  # noqa: F401, imported for Mypy.
 )
 
 from ._compat import (
-    bytes,
     is_bare,
     is_frozenset,
     is_mapping,
@@ -24,7 +23,6 @@ from ._compat import (
     is_tuple,
     is_union_type,
     lru_cache,
-    unicode,
 )
 from .disambiguators import create_uniq_field_dis_func
 from .multistrategy_dispatch import MultiStrategyDispatch
@@ -80,7 +78,7 @@ class Converter(object):
         self._unstructure_func.register_cls_list(
             [
                 (bytes, self._unstructure_identity),
-                (unicode, self._unstructure_identity),
+                (str, self._unstructure_identity),
             ]
         )
         self._unstructure_func.register_func_list(
@@ -112,7 +110,7 @@ class Converter(object):
         # Strings are sequences.
         self._structure_func.register_cls_list(
             [
-                (unicode, self._structure_call),
+                (str, self._structure_call),
                 (bytes, self._structure_call),
                 (int, self._structure_call),
                 (float, self._structure_call),
@@ -255,7 +253,7 @@ class Converter(object):
 
     def _structure_unicode(self, obj, cl):
         """Just call ``cl`` with the given ``obj``"""
-        if not isinstance(obj, (bytes, unicode)):
+        if not isinstance(obj, (bytes, str)):
             return cl(str(obj))
         else:
             return obj
