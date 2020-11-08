@@ -74,9 +74,9 @@ def test_enum_unstructure(enum, dump_strat, data):
 
 
 @given(nested_classes)
-def test_attrs_asdict_unstructure(converter, nested_class):
-    # type: (Converter, Type) -> None
+def test_attrs_asdict_unstructure(nested_class):
     """Our dumping should be identical to `attrs`."""
+    converter = Converter()
     instance = nested_class[0]()
     assert converter.unstructure(instance) == asdict(instance)
 
@@ -91,10 +91,11 @@ def test_attrs_astuple_unstructure(nested_class):
 
 
 @given(simple_classes())
-def test_unstructure_hooks(converter, cl_and_vals):
+def test_unstructure_hooks(cl_and_vals):
     """
     Unstructure hooks work.
     """
+    converter = Converter()
     cl, vals = cl_and_vals
     inst = cl(*vals)
 

@@ -59,7 +59,9 @@ def test_nodefs_generated_unstructuring_cl(converter, cl_and_vals):
     """Test omitting default values on a per-class basis."""
     cl, vals = cl_and_vals
 
-    for attr, val in zip(cl.__attrs_attrs__, vals):
+    for attr, val in zip(
+        tuple(v for _, v in cl.__dataclass_fields__.items()), vals
+    ):
         if attr.default is not MISSING:
             break
     else:
@@ -73,7 +75,9 @@ def test_nodefs_generated_unstructuring_cl(converter, cl_and_vals):
 
     res = converter.unstructure(inst)
 
-    for attr, val in zip(cl.__attrs_attrs__, vals):
+    for attr, val in zip(
+        tuple(v for _, v in cl.__dataclass_fields__.items()), vals
+    ):
         if attr.default is not MISSING:
             if val == attr.default:
                 assert attr.name not in res
@@ -95,7 +99,9 @@ def test_individual_overrides(cl_and_vals):
     converter = Converter()
     cl, vals = cl_and_vals
 
-    for attr, val in zip(cl.__attrs_attrs__, vals):
+    for attr, val in zip(
+        tuple(v for _, v in cl.__dataclass_fields__.items()), vals
+    ):
         if attr.default is not MISSING:
             break
     else:
@@ -117,7 +123,9 @@ def test_individual_overrides(cl_and_vals):
 
     res = converter.unstructure(inst)
 
-    for attr, val in zip(cl.__attrs_attrs__, vals):
+    for attr, val in zip(
+        tuple(v for _, v in cl.__dataclass_fields__.items()), vals
+    ):
         if attr is chosen:
             assert attr.name in res
         elif attr.default is not MISSING:

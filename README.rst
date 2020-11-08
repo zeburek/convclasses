@@ -123,7 +123,7 @@ destructure them.
 
 * Free software: MIT license
 * Documentation: https://convclasses.readthedocs.io.
-* Python versions supported: 3.6 and up.
+* Python versions supported: 3.7 and up.
 
 
 Features

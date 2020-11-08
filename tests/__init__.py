@@ -217,7 +217,7 @@ def just_class_with_type_takes_self(tup):
     combined_attrs = list(tup[0])
     combined_attrs.append(
         (
-            _get_field(default_factory=lambda _: nested_cl(), type=nested_cl),
+            _get_field(default_factory=lambda: nested_cl(), _type=nested_cl),
             st.just(nested_cl()),
         )
     )
@@ -228,7 +228,10 @@ def just_frozen_class_with_type(tup):
     nested_cl = tup[1][0]
     combined_attrs = list(tup[0])
     combined_attrs.append(
-        (_get_field(default=nested_cl(), type=nested_cl), st.just(nested_cl()))
+        (
+            _get_field(default=nested_cl(), _type=nested_cl),
+            st.just(nested_cl()),
+        )
     )
     return _create_hyp_class(combined_attrs)
 
@@ -379,7 +382,7 @@ def optional_attrs(draw, defaults=None):
     if defaults is True or (defaults is None and draw(st.booleans())):
         default = draw(val_strat)
 
-    return (field(default=default), val_strat)
+    return (_get_field(default=default), val_strat)
 
 
 def simple_attrs(defaults=None):

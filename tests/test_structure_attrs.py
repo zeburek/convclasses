@@ -29,16 +29,16 @@ def test_structure_simple_from_dict_default(converter, cl_and_vals, data):
     """Test structuring non-nested attrs classes with default value."""
     cl, vals = cl_and_vals
     obj = cl(*vals)
-    attrs_with_defaults = [a for a in fields(cl) if a.default is not MISSING]
+    attrs_with_defaults = [a for a in fields(cl) if (a.default is not MISSING) or (a.default_factory is not MISSING)]
     to_remove = data.draw(
         lists(elements=sampled_from(attrs_with_defaults), unique=True)
     )
 
     for a in to_remove:
-        if isinstance(a.default, typing.Callable):
-            setattr(obj, a.name, a.default())
-        else:
+        if a.default is not MISSING:
             setattr(obj, a.name, a.default)
+        elif a.default_factory is not MISSING:
+            setattr(obj, a.name, a.default_factory())
 
     dumped = asdict(obj)
 
@@ -49,9 +49,9 @@ def test_structure_simple_from_dict_default(converter, cl_and_vals, data):
 
 
 @given(simple_classes())
-def test_roundtrip(converter, cl_and_vals):
-    # type: (Converter, Any) -> None
+def test_roundtrip(cl_and_vals):
     """We dump the class, then we load it."""
+    converter = Converter()
     cl, vals = cl_and_vals
     obj = cl(*vals)
 

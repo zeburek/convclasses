@@ -384,9 +384,12 @@ class Converter(object):
         cl = self._dis_func_cache(union)(obj)
         return self._structure_func.dispatch(cl)(obj, cl)
 
-    def _structure_tuple(self, obj, tup):
+    def _structure_tuple(self, obj, tup: Type[T]):
         """Deal with converting to a tuple."""
-        tup_params = tup.__args__
+        if tup in (Tuple, tuple):
+            tup_params = None
+        else:
+            tup_params = tup.__args__
         has_ellipsis = tup_params and tup_params[-1] is Ellipsis
         if tup_params is None or (has_ellipsis and tup_params[0] is Any):
             # Just a Tuple. (No generic information.)

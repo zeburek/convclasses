@@ -2,6 +2,11 @@
 History
 =======
 
+1.1.0
+------------------
+* Removed Python 3.6 support
+* Added Python 3.9 support
+
 1.0.0
 ------------------
 * Rename ``cattrs`` into ``conclasses``

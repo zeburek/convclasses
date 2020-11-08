@@ -46,7 +46,7 @@ def make_dict_unstructure_fn(cl, converter, omit_if_default=False, **kwargs):
                 if default_factory != dataclasses.MISSING:
                     globs[def_name] = default_factory
                     post_lines.append(
-                        "    if i.{name} != {def_name}(i):".format(
+                        "    if i.{name} != {def_name}():".format(
                             name=field_name, def_name=def_name
                         )
                     )
@@ -94,7 +94,7 @@ def make_dict_unstructure_fn(cl, converter, omit_if_default=False, **kwargs):
                     # The default is computed every time.
                     globs[def_name] = default_factory
                     post_lines.append(
-                        "    if i.{name} != {def_name}(i):".format(
+                        "    if i.{name} != {def_name}():".format(
                             name=field_name, def_name=def_name
                         )
                     )
