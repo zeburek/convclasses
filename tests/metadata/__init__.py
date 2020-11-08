@@ -2,19 +2,21 @@
 import dataclasses
 import sys
 from dataclasses import MISSING
-from typing import Any, Dict, List, FrozenSet, Tuple
+from typing import Any, Dict, FrozenSet, List, Tuple
 
 from hypothesis.strategies import (
     booleans,
     composite,
     dictionaries,
     floats,
+    frozensets,
     integers,
     just,
     lists,
     recursive,
+    sets,
     text,
-    tuples, sets, frozensets,
+    tuples,
 )
 
 from .. import gen_attr_names, make_dataclass
@@ -49,24 +51,24 @@ def lists_of_typed_attrs(defaults=None):
 def simple_typed_attrs(defaults=None):
     if not is_39_or_later:
         return (
-                bare_typed_attrs(defaults)
-                | int_typed_attrs(defaults)
-                | str_typed_attrs(defaults)
-                | float_typed_attrs(defaults)
-                | dict_typed_attrs(defaults)
+            bare_typed_attrs(defaults)
+            | int_typed_attrs(defaults)
+            | str_typed_attrs(defaults)
+            | float_typed_attrs(defaults)
+            | dict_typed_attrs(defaults)
         )
     else:
         return (
-                bare_typed_attrs(defaults)
-                | int_typed_attrs(defaults)
-                | str_typed_attrs(defaults)
-                | float_typed_attrs(defaults)
-                | dict_typed_attrs(defaults)
-                | new_dict_typed_attrs(defaults)
-                | set_typed_attrs(defaults)
-                | list_typed_attrs(defaults)
-                | frozenset_typed_attrs(defaults)
-                | homo_tuple_typed_attrs(defaults)
+            bare_typed_attrs(defaults)
+            | int_typed_attrs(defaults)
+            | str_typed_attrs(defaults)
+            | float_typed_attrs(defaults)
+            | dict_typed_attrs(defaults)
+            | new_dict_typed_attrs(defaults)
+            | set_typed_attrs(defaults)
+            | list_typed_attrs(defaults)
+            | frozenset_typed_attrs(defaults)
+            | homo_tuple_typed_attrs(defaults)
         )
 
 
@@ -168,7 +170,10 @@ def new_dict_typed_attrs(draw, defaults=None):
     val_strat = dictionaries(keys=text(), values=integers())
     if defaults is True or (defaults is None and draw(booleans())):
         default = lambda: draw(val_strat)
-    return (_get_field(_type=dict[str, int], default_factory=default), val_strat)
+    return (
+        _get_field(_type=dict[str, int], default_factory=default),
+        val_strat,
+    )
 
 
 @composite

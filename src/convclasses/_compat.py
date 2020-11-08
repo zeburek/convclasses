@@ -3,14 +3,14 @@ from functools import lru_cache, singledispatch  # noqa
 from typing import (
     Dict,
     FrozenSet,
+    List,
     Mapping,
+    MutableMapping,
     MutableSequence,
     MutableSet,
     Sequence,
-    Tuple,
-    List,
-    MutableMapping,
     Set,
+    Tuple,
 )
 
 version_info = sys.version_info[0:3]

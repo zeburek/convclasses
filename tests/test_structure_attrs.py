@@ -1,5 +1,4 @@
 """Loading of attrs classes."""
-import typing
 from dataclasses import MISSING, asdict, astuple, fields
 from typing import Any, Union
 
@@ -29,7 +28,11 @@ def test_structure_simple_from_dict_default(converter, cl_and_vals, data):
     """Test structuring non-nested attrs classes with default value."""
     cl, vals = cl_and_vals
     obj = cl(*vals)
-    attrs_with_defaults = [a for a in fields(cl) if (a.default is not MISSING) or (a.default_factory is not MISSING)]
+    attrs_with_defaults = [
+        a
+        for a in fields(cl)
+        if (a.default is not MISSING) or (a.default_factory is not MISSING)
+    ]
     to_remove = data.draw(
         lists(elements=sampled_from(attrs_with_defaults), unique=True)
     )
