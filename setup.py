@@ -29,7 +29,7 @@ dev_reqs = [
 
 setup(
     name="convclasses",
-    version="1.0.0",
+    version="1.1.0",
     description="Complex custom class converters for dataclasses",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
