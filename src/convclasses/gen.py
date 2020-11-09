@@ -1,7 +1,8 @@
 import dataclasses
-from typing import Optional, Sequence
+import re
+from typing import Optional, Sequence, Type, TypeVar
 
-from ._compat import is_sequence
+from ._compat import get_args, get_origin, is_generic, is_sequence
 
 
 @dataclasses.dataclass(frozen=True)
@@ -163,3 +164,95 @@ def make_dict_unstructure_fn(cl, converter, omit_if_default=False, **kwargs):
     fn = globs[fn_name]
 
     return fn
+
+
+def generate_mapping(cl: Type, old_mapping):
+    mapping = {}
+    for p, t in zip(get_origin(cl).__parameters__, get_args(cl)):
+        if isinstance(t, TypeVar):
+            continue
+        mapping[p.__name__] = t
+
+    if not mapping:
+        return old_mapping
+
+    cls = dataclasses.make_dataclass(
+        "GenericMapping",
+        mapping.keys(),
+        frozen=True,
+    )
+
+    return cls(**mapping)
+
+
+def make_dict_structure_fn(cl: Type, converter, **kwargs):
+    """Generate a specialized dict structuring function for an attrs class."""
+
+    mapping = None
+    if is_generic(cl):
+        base = get_origin(cl)
+        mapping = generate_mapping(cl, mapping)
+        cl = base
+
+    for base in getattr(cl, "__orig_bases__", ()):
+        if is_generic(base) and not str(base).startswith("typing.Generic"):
+            mapping = generate_mapping(base, mapping)
+            break
+
+    if isinstance(cl, TypeVar):
+        cl = getattr(mapping, cl.__name__, cl)
+
+    cl_name = cl.__name__
+    fn_name = "structure_" + cl_name
+
+    # We have generic parameters and need to generate a unique name for the function
+    for p in getattr(cl, "__parameters__", ()):
+        # This is nasty, I am not sure how best to handle
+        # `typing.List[str]` or `TClass[int, int]` as a parameter type here
+        name_base = getattr(mapping, p.__name__)
+        name = getattr(name_base, "__name__", str(name_base))
+        name = re.sub(r"[\[\.\] ,]", "_", name)
+        fn_name += f"_{name}"
+
+    globs = {"__c_s": converter.structure, "__cl": cl, "__m": mapping}
+    lines = []
+    post_lines = []
+
+    attrs = dataclasses.fields(cl)
+
+    # if any(isinstance(a.type, str) for a in attrs):
+    #     # PEP 563 annotations - need to be resolved.
+    #     resolve_types(cl)
+
+    lines.append(f"def {fn_name}(o, *_):")
+    lines.append("  res = {")
+    for a in attrs:
+        an = a.name
+        override = kwargs.pop(an, _neutral)
+        type = a.type
+        if isinstance(type, TypeVar):
+            type = getattr(mapping, type.__name__, type)
+
+        kn = (
+            an
+            if getattr(override, "rename", None) is None
+            else override.rename
+        )
+        globs[f"__c_t_{an}"] = type
+        if (
+            a.default is dataclasses.MISSING
+            and a.default_factory is dataclasses.MISSING
+        ):
+            lines.append(f"    '{an}': __c_s(o['{kn}'], __c_t_{an}),")
+        else:
+            post_lines.append(f"  if '{kn}' in o:")
+            post_lines.append(
+                f"    res['{an}'] = __c_s(o['{kn}'], __c_t_{an})"
+            )
+    lines.append("    }")
+
+    total_lines = lines + post_lines + ["  return __cl(**res)"]
+
+    eval(compile("\n".join(total_lines), "", "exec"), globs)
+
+    return globs[fn_name]

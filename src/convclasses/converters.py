@@ -1,3 +1,4 @@
+import logging
 from dataclasses import is_dataclass
 from enum import Enum
 from typing import (  # noqa: F401, imported for Mypy.
@@ -15,8 +16,10 @@ from typing import (  # noqa: F401, imported for Mypy.
 )
 
 from ._compat import (
+    get_origin,
     is_bare,
     is_frozenset,
+    is_generic,
     is_mapping,
     is_mutable_set,
     is_sequence,
@@ -25,11 +28,14 @@ from ._compat import (
     lru_cache,
 )
 from .disambiguators import create_uniq_field_dis_func
+from .gen import make_dict_structure_fn
 from .multistrategy_dispatch import MultiStrategyDispatch
 
 NoneType = type(None)
 T = TypeVar("T")
 V = TypeVar("V")
+
+logger = logging.getLogger("convclasses")
 
 
 class UnstructureStrategy(Enum):
@@ -125,6 +131,8 @@ class Converter(object):
 
     def unstructure(self, obj):
         # type: (Any) -> Any
+        logger.debug("Unstructuring obj:", obj)
+
         return self._unstructure_func.dispatch(obj.__class__)(obj)
 
     @property
@@ -177,6 +185,7 @@ class Converter(object):
     def structure(self, obj, cl):
         # type: (Any, Type[T]) -> T
         """Convert unstructured Python data structures to structured data."""
+        logger.debug("Structuring obj:", obj, "class:", cl)
 
         return self._structure_func.dispatch(cl)(obj, cl)
 
@@ -233,8 +242,13 @@ class Converter(object):
         Bare optionals end here too (optionals with arguments are unions.) We
         treat bare optionals as Any.
         """
-        if cl is Any or cl is Optional:
+        if cl is Any or cl is Optional or cl is None:
             return obj
+
+        if is_generic(cl):
+            fn = make_dict_structure_fn(cl, self)
+            self.register_structure_hook(cl, fn)
+            return fn(obj)
         # We don't know what this is, so we complain loudly.
         msg = (
             "Unsupported type: {0}. Register a structure hook for "
@@ -417,7 +431,7 @@ class Converter(object):
                 e for e in union_types if e is not NoneType  # type: ignore
             )
 
-        if not all(is_dataclass(e) for e in union_types):
+        if not all(is_dataclass(get_origin(e) or e) for e in union_types):
             raise ValueError(
                 "Only unions of dataclasses supported "
                 "currently. Register a loads hook manually."

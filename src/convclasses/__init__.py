@@ -7,6 +7,7 @@ __all__ = (
     "structure_dataclass_fromtuple",
     "structure_dataclass_fromdict",
     "UnstructureStrategy",
+    "Converter",
 )
 
 __author__ = "Parviz Khavari"

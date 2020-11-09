@@ -178,7 +178,6 @@ obj = Dignissim(
     rationibus=False,
 )
 
-
 converter = convclasses.Converter()
 
 
