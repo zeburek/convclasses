@@ -8,9 +8,7 @@ with open("README.rst") as readme_file:
 with open("HISTORY.rst") as history_file:
     history = history_file.read()
 
-requirements = [
-    "dataclasses == 0.7; python_version=='3.6'",
-]
+requirements = []
 
 dev_reqs = [
     "bumpversion",
@@ -29,7 +27,7 @@ dev_reqs = [
 
 setup(
     name="convclasses",
-    version="1.1.0",
+    version="2.0.0",
     description="Complex custom class converters for dataclasses",
     long_description=readme + "\n\n" + history,
     long_description_content_type="text/x-rst",
@@ -46,7 +44,7 @@ setup(
     keywords="convclasses",
     python_requires="~=3.7",
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",

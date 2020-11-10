@@ -15,7 +15,7 @@ Types of Contributions
 Report Bugs
 ~~~~~~~~~~~
 
-Report bugs at https://github.com/Tinche/cattrs/issues.
+Report bugs at https://github.com/zeburek/convclasses/issues.
 
 If you are reporting a bug, please include:
 
@@ -38,14 +38,14 @@ and "help wanted" is open to whoever wants to implement it.
 Write Documentation
 ~~~~~~~~~~~~~~~~~~~
 
-cattrs could always use more documentation, whether as part of the
-official cattrs docs, in docstrings, or even on the web in blog posts,
+convclasses could always use more documentation, whether as part of the
+official convclasses docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
 Submit Feedback
 ~~~~~~~~~~~~~~~
 
-The best way to send feedback is to file an issue at https://github.com/Tinche/cattrs/issues.
+The best way to send feedback is to file an issue at https://github.com/zeburek/convclasses/issues.
 
 If you are proposing a feature:
 
@@ -57,17 +57,17 @@ If you are proposing a feature:
 Get Started!
 ------------
 
-Ready to contribute? Here's how to set up `cattrs` for local development.
+Ready to contribute? Here's how to set up `convclasses` for local development.
 
-1. Fork the `cattrs` repo on GitHub.
+1. Fork the `convclasses` repo on GitHub.
 2. Clone your fork locally::
 
-    $ git clone git@github.com:your_name_here/cattrs.git
+    $ git clone git@github.com:your_name_here/convclasses.git
 
 3. Install your local copy into a virtualenv. Assuming you have virtualenvwrapper installed, this is how you set up your fork for local development::
 
-    $ mkvirtualenv cattrs
-    $ cd cattrs/
+    $ mkvirtualenv convclasses
+    $ cd convclasses/
     $ pip install -e .\[dev\]
 
 4. Create a branch for local development::
@@ -78,7 +78,7 @@ Ready to contribute? Here's how to set up `cattrs` for local development.
 
 5. When you're done making changes, check that your changes pass flake8 and the tests, including testing other Python versions with tox::
 
-    $ flake8 cattrs tests
+    $ flake8 convclasses tests
     $ pytest
     $ tox
 
@@ -101,9 +101,8 @@ Before you submit a pull request, check that it meets these guidelines:
 2. If the pull request adds functionality, the docs should be updated. Put
    your new functionality into a function with a docstring, and add the
    feature to the list in README.rst.
-3. The pull request should work for all supported Python versions. Check
-   https://travis-ci.org/Tinche/cattrs/pull_requests
-   and make sure that the tests pass for all supported Python versions.
+3. The pull request should work for all supported Python versions.
+   Make sure that the tests pass for all supported Python versions.
 
 Tips
 ----

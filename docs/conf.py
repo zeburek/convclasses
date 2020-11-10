@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# cattrs documentation build configuration file, created by
+# convclasses documentation build configuration file, created by
 # sphinx-quickstart on Tue Jul  9 22:26:36 2013.
 #
 # This file is execfile()d with the current directory set to its
@@ -60,7 +60,7 @@ master_doc = "index"
 
 # General information about the project.
 project = u"convclasses"
-copyright = u"2019, Parviz Khavari"
+copyright = u"2020, Parviz Khavari"
 
 # The version info for the project you're documenting, acts as replacement
 # for |version| and |release|, also used in various other places throughout

@@ -1,5 +1,6 @@
 import types
-from dataclasses import Field, _EMPTY_METADATA, field as fld, dataclass
+from dataclasses import _EMPTY_METADATA, Field, dataclass
+from dataclasses import field as fld
 from enum import Enum
 
 _pref = "convclasses"

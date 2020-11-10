@@ -2,6 +2,12 @@
 History
 =======
 
+2.0.0
+__________________
+* Add support for modifiers
+    * Add dataclass field name modifier
+* Add support for generic types (ported from cattrs)
+
 1.1.0
 ------------------
 * Removed Python 3.6 support

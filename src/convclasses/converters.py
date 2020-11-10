@@ -1,5 +1,5 @@
 import logging
-from dataclasses import is_dataclass, fields
+from dataclasses import fields, is_dataclass
 from enum import Enum
 from typing import (  # noqa: F401, imported for Mypy.
     Any,
@@ -281,9 +281,7 @@ class Converter(object):
         # type: (Tuple, Type[T]) -> T
         """Load an dataclass from a sequence (tuple)."""
         conv_obj = []  # A list of converter parameters.
-        for a, value in zip(
-            tuple(fields(cl)), obj
-        ):
+        for a, value in zip(tuple(fields(cl)), obj):
             # We detect the type by the metadata.
             converted = self._structure_dataclass_from_tuple(a, a.name, value)
             conv_obj.append(converted)

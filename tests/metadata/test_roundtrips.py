@@ -1,5 +1,5 @@
 """Test both structuring and unstructuring."""
-from dataclasses import dataclass, fields, make_dataclass, field, MISSING
+from dataclasses import MISSING, dataclass, fields, make_dataclass
 from typing import Optional, Union
 
 import pytest

@@ -55,7 +55,7 @@ coverage.xml
 # Sphinx documentation
 README.html
 docs/_build/
-docs/cattr.rst
+docs/convclasses.rst
 docs/modules.rst
 
 # PyBuilder
