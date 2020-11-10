@@ -1,4 +1,5 @@
 from .converters import Converter, UnstructureStrategy
+from .modifiers import mod
 
 __all__ = (
     "global_converter",
@@ -8,6 +9,7 @@ __all__ = (
     "structure_dataclass_fromdict",
     "UnstructureStrategy",
     "Converter",
+    "mod",
 )
 
 __author__ = "Parviz Khavari"

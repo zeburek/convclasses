@@ -1,5 +1,5 @@
 import logging
-from dataclasses import is_dataclass
+from dataclasses import is_dataclass, fields
 from enum import Enum
 from typing import (  # noqa: F401, imported for Mypy.
     Any,
@@ -29,6 +29,7 @@ from ._compat import (
 )
 from .disambiguators import create_uniq_field_dis_func
 from .gen import make_dict_structure_fn
+from .modifiers import _Modificator
 from .multistrategy_dispatch import MultiStrategyDispatch
 
 NoneType = type(None)
@@ -193,19 +194,21 @@ class Converter(object):
     def unstructure_dataclass_asdict(self, obj):
         # type: (Any) -> Dict[str, Any]
         """Our version of `dataclasses.asdict`, so we can call back to us."""
-        fields = obj.__class__.__dataclass_fields__
+        flds = fields(obj.__class__)
         dispatch = self._unstructure_func.dispatch
         rv = self._dict_factory()
-        for f in fields:
-            v = getattr(obj, f)
-            rv[f] = dispatch(v.__class__)(v)
+        for f in flds:
+            v = getattr(obj, f.name)
+            in_obj_name = _Modificator(f).obj_name
+
+            rv[in_obj_name] = dispatch(v.__class__)(v)
         return rv
 
     def unstructure_dataclass_astuple(self, obj):
         # type: (Any) -> Tuple
         """Our version of `dataclasses.astuple`, so we can call back to us."""
-        fields = obj.__class__.__dataclass_fields__
-        return tuple(self.unstructure(getattr(obj, f)) for f in fields)
+        flds = fields(obj.__class__)
+        return tuple(self.unstructure(getattr(obj, f.name)) for f in flds)
 
     def _unstructure_enum(self, obj):
         """Convert an enum to its value."""
@@ -279,7 +282,7 @@ class Converter(object):
         """Load an dataclass from a sequence (tuple)."""
         conv_obj = []  # A list of converter parameters.
         for a, value in zip(
-            tuple(v for _, v in cl.__dataclass_fields__.items()), obj
+            tuple(fields(cl)), obj
         ):
             # We detect the type by the metadata.
             converted = self._structure_dataclass_from_tuple(a, a.name, value)
@@ -301,13 +304,14 @@ class Converter(object):
         # For public use.
         conv_obj = {}  # Start with a fresh dict, to ignore extra keys.
         dispatch = self._structure_func.dispatch
-        for _, a in cl.__dataclass_fields__.items():  # type: ignore
+        for a in fields(cl):  # type: ignore
             # We detect the type by metadata.
             type_ = a.type
             name = a.name
+            in_obj_name = _Modificator(a).obj_name
 
             try:
-                val = obj[name]
+                val = obj[in_obj_name]
             except KeyError:
                 continue
 

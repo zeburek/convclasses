@@ -1,12 +1,12 @@
 """Test both structuring and unstructuring."""
-from dataclasses import dataclass, fields, make_dataclass
+from dataclasses import dataclass, fields, make_dataclass, field, MISSING
 from typing import Optional, Union
 
 import pytest
 from hypothesis import assume, given
 from hypothesis.strategies import sampled_from
 
-from convclasses import Converter, UnstructureStrategy
+from convclasses import Converter, UnstructureStrategy, mod
 
 from . import nested_typed_classes, simple_typed_attrs, simple_typed_classes
 
@@ -33,6 +33,24 @@ def test_simple_roundtrip_defaults(cls_and_vals, strat):
     cl = make_dataclass("HypClass", [("a", a.type, a)])
     converter = Converter(unstruct_strat=strat)
     inst = cl()
+    assert inst == converter.structure(converter.unstructure(inst), cl)
+
+
+@given(simple_typed_classes())
+def test_simple_name_modifiers(cls_and_vals):
+    """
+    Simple classes with metadata can be unstructured and restructured.
+    """
+    a, vals = cls_and_vals
+    converter = Converter()
+    if len(fields(a)) > 0:
+        fld = mod.name("t-t", fields(a)[0])
+        cl = make_dataclass("HypClass", [("t_t", fld.type, fld)])
+        inst = cl(vals[0])
+        assert converter.unstructure(inst).get("t-t", MISSING) is not MISSING
+    else:
+        cl = make_dataclass("HypClass", [])
+        inst = cl()
     assert inst == converter.structure(converter.unstructure(inst), cl)
 
 
